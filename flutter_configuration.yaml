@@ -1,0 +1,43 @@
+name: stylesense_ai
+description: A premium AI-powered luxury fashion and styling application for personalized face-shape and color palette recommendations.
+version: 1.0.0+1
+
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Premium styling utilities (optional but highly recommended for native deployment)
+  cupertino_icons: ^1.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Asset registrations for your GitHub setup
+  # Create a folder in your project root called 'assets/images/' for your styling placeholders
+  assets:
+    - assets/images/
+
+  # Elegant typography imports for the high-end editorial look
+  fonts:
+    - family: Playfair Display
+      fonts:
+        - asset: fonts/PlayfairDisplay-Bold.ttf
+          weight: 700
+        - asset: fonts/PlayfairDisplay-Regular.ttf
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: fonts/PlusJakartaSans-Regular.ttf
+        - asset: fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
