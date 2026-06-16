@@ -472,7 +472,6 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   _buildTextField('Email Address', _loginEmailController, false, TextInputType.emailAddress),
                   const SizedBox(height: 20),
                   _buildTextField('Password', _loginPasswordController, true, TextInputType.visiblePassword),
-                  const Alignment(1.0, 0.0),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -727,7 +726,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   // Greeting row
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.between,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1290,7 +1289,7 @@ class _UndertoneQuizDialogState extends State<_UndertoneQuizDialog> {
       backgroundColor: AppPalette.background,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: Row(
-        mainAxisAlignment: MainAxisAlignment.between,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text('Undertone Finder', style: TextStyle(fontFamily: 'Playfair Display', fontWeight: FontWeight.bold)),
           Text('$_currentStep/3', style: const TextStyle(fontSize: 12, color: AppPalette.secondary)),
@@ -1583,7 +1582,7 @@ class _RecommendationHubScreenState extends State<RecommendationHubScreen> with 
               tabs: const [
                 Tab(icon: Icon(Icons.face, size: 18), text: 'HAIRCUTS'),
                 Tab(icon: Icon(Icons.palette_outlined, size: 18), text: 'COLORS'),
-                Tab(icon: Icon(Icons.glasses, size: 18), text: 'EYEWEAR'),
+                Tab(icon: Icon(Icons.remove_red_eye, size: 18), text: 'EYEWEAR'),
               ],
             ),
           ),
@@ -1674,7 +1673,7 @@ class _RecommendationHubScreenState extends State<RecommendationHubScreen> with 
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.between,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(item['name']!, style: const TextStyle(fontFamily: 'Playfair Display', fontSize: 18, fontWeight: FontWeight.bold)),
                     IconButton(
@@ -1961,7 +1960,7 @@ class MarketplaceScreen extends StatelessWidget {
                                   p['type'] == 'Coat'
                                       ? Icons.checkroom
                                       : p['type'] == 'Glasses'
-                                          ? Icons.glasses
+                                          ? Icons.remove_red_eye
                                           : Icons.science_outlined,
                                   color: AppPalette.secondary,
                                   size: 30,
