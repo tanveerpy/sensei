@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -1005,9 +1006,13 @@ class AiAnalysisScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
-                onPressed: () {
-                  // Simulates capturing from camera
-                  _runAnalysisMock(context, 'Heart', 'Fair', 'Warm');
+                onPressed: () async {
+                  final picker = ImagePicker();
+                  final image = await picker.pickImage(source: ImageSource.camera);
+                  if (image != null) {
+                    if (!context.mounted) return;
+                    _runAnalysisMock(context, 'Heart', 'Fair', 'Warm');
+                  }
                 },
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Open Device Camera', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -1020,9 +1025,13 @@ class AiAnalysisScreen extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               OutlinedButton.icon(
-                onPressed: () {
-                  // Simulates file upload
-                  _runAnalysisMock(context, 'Oval', 'Medium', 'Neutral');
+                onPressed: () async {
+                  final picker = ImagePicker();
+                  final image = await picker.pickImage(source: ImageSource.gallery);
+                  if (image != null) {
+                    if (!context.mounted) return;
+                    _runAnalysisMock(context, 'Oval', 'Medium', 'Neutral');
+                  }
                 },
                 icon: const Icon(Icons.photo_library),
                 label: const Text('Upload from Gallery', style: TextStyle(fontWeight: FontWeight.bold)),
