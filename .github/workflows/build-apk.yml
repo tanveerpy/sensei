@@ -1,0 +1,58 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Bootstrap Flutter Project
+        run: |
+          # 1. Create a standard Flutter project layout
+          flutter create app_build
+          
+          # 2. Copy the main source file
+          cp flutter_application_source.dart app_build/lib/main.dart
+          
+          # 3. Use the provided flutter configuration as pubspec.yaml
+          cp flutter_configuration.yaml app_build/pubspec.yaml
+          
+          # 4. Remove assets/fonts block from pubspec.yaml if they are missing
+          # (Otherwise the flutter build will fail looking for local fonts/images)
+          sed -i '/assets:/,$d' app_build/pubspec.yaml
+          
+      - name: Get Dependencies
+        run: |
+          cd app_build
+          flutter pub get
+
+      - name: Build APK
+        run: |
+          cd app_build
+          flutter build apk --release
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StyleSense-Release-APK
+          path: app_build/build/app/outputs/flutter-apk/app-release.apk
