@@ -115,11 +115,23 @@ class _StyleSenseAppState extends State<StyleSenseApp> {
     return AppStateManager(
       stateNotifier: _stateNotifier,
       child: MaterialApp(
-        title: 'StyleSense AI',
+        title: 'Tulip',
         debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage('https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&q=80'),
+                fit: BoxFit.cover,
+                opacity: 0.15,
+              ),
+            ),
+            child: child,
+          );
+        },
         theme: ThemeData(
           useMaterial3: true,
-          scaffoldBackgroundColor: AppPalette.background,
+          scaffoldBackgroundColor: Colors.transparent,
           primaryColor: AppPalette.primary,
           colorScheme: ColorScheme.fromSeed(
             seedColor: AppPalette.secondary,
@@ -194,7 +206,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppPalette.background,
+      backgroundColor: Colors.transparent,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
@@ -222,7 +234,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
               const SizedBox(height: 28),
               const Text(
-                'StyleSense AI',
+                'Tulip',
                 style: TextStyle(
                   fontFamily: 'Playfair Display',
                   fontSize: 34,
@@ -233,7 +245,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
               const SizedBox(height: 10),
               const Text(
-                'DISCOVER YOUR BEST LOOK',
+                'STYLE THAT SUITS YOU',
                 style: TextStyle(
                   fontFamily: 'Plus Jakarta Sans',
                   fontSize: 11,
@@ -329,7 +341,7 @@ class WelcomeScreen extends StatelessWidget {
                   elevation: 2,
                 ),
                 child: const Text(
-                  'Join StyleSense',
+                  'Join Tulip',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                 ),
               ),
@@ -437,7 +449,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'StyleSense AI',
+          'Tulip',
           style: TextStyle(fontFamily: 'Playfair Display', color: AppPalette.textDark, fontWeight: FontWeight.bold),
         ),
         bottom: TabBar(
@@ -1918,7 +1930,7 @@ class MarketplaceScreen extends StatelessWidget {
               icon: const Icon(Icons.arrow_back_ios_new, color: AppPalette.textDark, size: 18),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text('StyleSense Shop', style: TextStyle(fontFamily: 'Playfair Display', color: AppPalette.textDark, fontWeight: FontWeight.bold)),
+            title: const Text('Tulip Shop', style: TextStyle(fontFamily: 'Playfair Display', color: AppPalette.textDark, fontWeight: FontWeight.bold)),
           ),
           body: SafeArea(
             child: Column(
