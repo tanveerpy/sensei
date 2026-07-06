@@ -1,0 +1,52 @@
+name: Build iOS IPA (Unsigned for AltStore)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build iOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: false
+
+      - name: Bootstrap Flutter Project
+        run: |
+          flutter create app_build
+          cp flutter_application_source.dart app_build/lib/main.dart
+          cp flutter_configuration.yaml app_build/pubspec.yaml
+          sed -i '' '/assets:/,$d' app_build/pubspec.yaml
+          
+      - name: Get Dependencies
+        run: |
+          cd app_build
+          flutter pub get
+
+      - name: Build iOS App (No Codesign)
+        run: |
+          cd app_build
+          # Build the iOS .app bundle without requiring Apple Developer certificates
+          flutter build ios --release --no-codesign
+          
+      - name: Package into IPA for AltStore
+        run: |
+          cd app_build/build/ios/iphoneos
+          mkdir Payload
+          mv *.app Payload/
+          zip -qq -r Tulip-iOS-Unsigned.ipa Payload
+          
+      - name: Upload iOS IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tulip-iOS-AltStore-IPA
+          path: app_build/build/ios/iphoneos/Tulip-iOS-Unsigned.ipa
