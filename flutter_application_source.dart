@@ -120,6 +120,7 @@ class _StyleSenseAppState extends State<StyleSenseApp> {
         builder: (context, child) {
           return Container(
             decoration: const BoxDecoration(
+              color: AppPalette.background,
               image: DecorationImage(
                 image: NetworkImage('https://images.unsplash.com/photo-1520763185298-1b434c919102?auto=format&fit=crop&q=80'),
                 fit: BoxFit.cover,
