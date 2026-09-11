@@ -9,7 +9,7 @@ on:
     branches:
       - main
       - master
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
@@ -35,14 +35,30 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate Android project files
+        run: |
+          # Create local.properties required by Gradle
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          echo "flutter.sdk=$(which flutter | sed 's|/bin/flutter||')" >> android/local.properties
+          echo "flutter.versionName=1.0.0" >> android/local.properties
+          echo "flutter.versionCode=1" >> android/local.properties
+          # Generate the gradlew wrapper files via flutter
+          flutter config --android-sdk $ANDROID_SDK_ROOT
+
+      - name: Make gradlew executable
+        run: |
+          cd android
+          gradle wrapper --gradle-version 8.0
+          chmod +x gradlew
+
       - name: Analyze code
         run: flutter analyze --no-fatal-infos
         continue-on-error: true
 
-      - name: Build APK (debug)
+      - name: Build Debug APK
         run: flutter build apk --debug
 
-      - name: Build APK (release)
+      - name: Build Release APK
         run: flutter build apk --release
 
       - name: Upload Debug APK
