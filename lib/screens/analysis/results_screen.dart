@@ -13,9 +13,12 @@ class ResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final profile = Provider.of<UserProfile>(context);
 
-    // Provide default mock values if analysis wasn't manually set
-    final faceShape = profile.faceShape != FaceShape.none ? profile.faceShape.name : 'Oval';
-    final undertone = profile.undertone != Undertone.none ? profile.undertone.name : 'Cool';
+    final faceShape = profile.faceShape != FaceShape.none
+        ? profile.faceShape.name
+        : 'Oval';
+    final undertone = profile.undertone != Undertone.none
+        ? profile.undertone.name
+        : 'Cool';
 
     return Scaffold(
       body: Stack(
@@ -41,10 +44,13 @@ class ResultsScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Your Face Analysis',
-                    style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 28),
+                    style: Theme.of(context)
+                        .textTheme
+                        .displayLarge
+                        ?.copyWith(fontSize: 28),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Simple Face Illustration
                   Center(
                     child: Container(
@@ -53,63 +59,106 @@ class ResultsScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.15),
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 2),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.3),
+                          width: 2,
+                        ),
                       ),
-                      child: const Icon(Icons.face_6, size: 64, color: AppColors.secondary),
+                      child: const Icon(
+                        Icons.face_6,
+                        size: 64,
+                        color: AppColors.secondary,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),
-              
-              // Face Analysis Results Cards
-              Row(
-                children: [
-                  Expanded(child: _buildResultCard(context, 'Face Shape', faceShape.toUpperCase(), Icons.face)),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildResultCard(context, 'Undertone', undertone.toUpperCase(), Icons.lens_blur)),
+
+                  // Face Analysis Results Cards
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildResultCard(
+                          context,
+                          'Face Shape',
+                          faceShape.toUpperCase(),
+                          Icons.face,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildResultCard(
+                          context,
+                          'Undertone',
+                          undertone.toUpperCase(),
+                          Icons.lens_blur,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 48),
+
+                  Text(
+                    'Made for you',
+                    style: Theme.of(context)
+                        .textTheme
+                        .displayMedium
+                        ?.copyWith(fontSize: 22),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Recommendation Cards
+                  _buildRecommendationCard(
+                    context,
+                    title: 'Dress Colors',
+                    subtitle: 'Based on your $undertone undertone',
+                    icon: Icons.palette_outlined,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const DressColorsScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildRecommendationCard(
+                    context,
+                    title: 'Glasses Frames',
+                    subtitle: 'Based on your $faceShape face shape',
+                    icon: Icons.visibility_outlined,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const GlassesFramesScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildRecommendationCard(
+                    context,
+                    title: 'Hairstyles',
+                    subtitle: 'Based on your $faceShape face shape',
+                    icon: Icons.face_retouching_natural,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const HairstylesScreen(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                 ],
               ),
-              
-              const SizedBox(height: 48),
-              
-              Text(
-                'Made for you',
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 22),
-              ),
-              const SizedBox(height: 16),
-              
-              // Recommendation Cards
-              _buildRecommendationCard(
-                context,
-                title: 'Dress Colors',
-                subtitle: 'Based on your $undertone undertone',
-                icon: Icons.palette_outlined,
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const DressColorsScreen())),
-              ),
-              const SizedBox(height: 16),
-              _buildRecommendationCard(
-                context,
-                title: 'Glasses Frames',
-                subtitle: 'Based on your $faceShape face shape',
-                icon: Icons.visibility_outlined,
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GlassesFramesScreen())),
-              ),
-              const SizedBox(height: 16),
-              _buildRecommendationCard(
-                context,
-                title: 'Hairstyles',
-                subtitle: 'Based on your $faceShape face shape',
-                icon: Icons.face_retouching_natural,
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HairstylesScreen())),
-              ),
-              const SizedBox(height: 32),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildResultCard(BuildContext context, String title, String value, IconData icon) {
+  Widget _buildResultCard(
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
+  ) {
     return Card(
       color: AppColors.primary.withOpacity(0.1),
       elevation: 0,
@@ -123,16 +172,31 @@ class ResultsScreen extends StatelessWidget {
           children: [
             Icon(icon, size: 40, color: AppColors.secondary),
             const SizedBox(height: 16),
-            Text(title, style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.textDark)),
+            Text(
+              value,
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 16,
+                color: AppColors.textDark,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRecommendationCard(BuildContext context, {
+  Widget _buildRecommendationCard(
+    BuildContext context, {
     required String title,
     required String subtitle,
     required IconData icon,
@@ -159,9 +223,21 @@ class ResultsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),

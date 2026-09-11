@@ -44,15 +44,15 @@ jobs:
           echo "flutter.versionCode=1" >> android/local.properties
 
       # Install Gradle 8.0 to avoid Groovy 4.x / Gradle 9.x incompatibility with Flutter's flutter.groovy
-      - name: Setup Gradle 8.0
+      - name: Setup Gradle 8.3
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '8.0'
+          gradle-version: '8.3'
 
       - name: Generate gradlew wrapper
         working-directory: android
         run: |
-          gradle wrapper --gradle-version 8.0
+          gradle wrapper --gradle-version 8.3
           chmod +x gradlew
 
       - name: Analyze code
