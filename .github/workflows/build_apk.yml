@@ -35,19 +35,23 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Generate Android project files
+      - name: Create local.properties
         run: |
-          # Create local.properties required by Gradle
+          FLUTTER_SDK=$(dirname $(dirname $(which flutter)))
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
-          echo "flutter.sdk=$(which flutter | sed 's|/bin/flutter||')" >> android/local.properties
+          echo "flutter.sdk=$FLUTTER_SDK" >> android/local.properties
           echo "flutter.versionName=1.0.0" >> android/local.properties
           echo "flutter.versionCode=1" >> android/local.properties
-          # Generate the gradlew wrapper files via flutter
-          flutter config --android-sdk $ANDROID_SDK_ROOT
 
-      - name: Make gradlew executable
+      # Install Gradle 8.0 to avoid Groovy 4.x / Gradle 9.x incompatibility with Flutter's flutter.groovy
+      - name: Setup Gradle 8.0
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.0'
+
+      - name: Generate gradlew wrapper
+        working-directory: android
         run: |
-          cd android
           gradle wrapper --gradle-version 8.0
           chmod +x gradlew
 
