@@ -151,7 +151,7 @@ class GlassesFramesScreen extends StatelessWidget {
                     color: AppColors.primary.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.glasses, color: AppColors.secondary, size: 28),
+                  child: const Icon(Icons.visibility_outlined, color: AppColors.secondary, size: 28),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

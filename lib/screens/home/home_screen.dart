@@ -77,7 +77,7 @@ class HomeScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
-                          Icons.sparkles,
+                          Icons.auto_awesome,
                           color: AppColors.secondary,
                           size: 26,
                         ),
