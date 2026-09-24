@@ -627,7 +627,8 @@ class FaceCardLogoPainter extends CustomPainter {
       ..quadraticBezierTo(center.dx, center.dy, center.dx + radius * 0.65, center.dy)
       ..quadraticBezierTo(center.dx, center.dy, center.dx, center.dy + radius)
       ..quadraticBezierTo(center.dx, center.dy, center.dx - radius * 0.65, center.dy)
-      ..quadraticBezierTo(center.dx, center.dy, center.dx - radius);
+      ..quadraticBezierTo(center.dx, center.dy, center.dx, center.dy - radius)
+      ..close();
     canvas.drawPath(path, paint);
   }
 
