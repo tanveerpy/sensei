@@ -1,65 +1,174 @@
-StyleSense AI ✦ Premium Fashion & Styling App
+# FaceCard ✦ Find what suits you.
 
-StyleSense AI is a modern, high-end mobile application written in Flutter, designed to analyze face geometries, categorize skin tones and undertones, and suggest highly curated styling, hairstyles, and eyewear choices tailored for both men and women.
+> **FaceCard** is a modern, premium personal style report mobile application built in **Flutter + Dart**, designed to analyze face geometries and undertones to deliver tailored styling recommendations.
 
-✨ Features Implemented
+---
 
-✦ Multi-Mode Analysis Engine: Supports fully interactive AI Mode (designed for front camera/gallery uploads) and a privacy-centric Manual Mode.
+## 🚫 Important: Non-Commercial Guarantee
 
-✦ Biometric Geometric Matrix Mapping: Dynamically matches specific haircut suggestions to 5 major face architectures (Oval, Round, Square, Heart, and Diamond).
+**FaceCard is NOT an e-commerce or shopping application.**
+- ❌ No products or brands
+- ❌ No stores or shopping links
+- ❌ No shopping carts or checkout flows
+- ❌ No marketplace, payments, or product affiliates
 
-✦ Interactive Undertone Quiz: Guides users to discover whether they have Warm, Cool, or Neutral undertone palettes.
+FaceCard is purely an **aesthetic analysis and personal styling report system** created for personal styling intelligence and academic/FYP rigor.
 
-✦ Curated Style Palette Guidance: Dynamic selection of high-fashion outfit color schemes tailored to the user's computed characteristics.
+---
 
-✦ E-Commerce Affiliates Integration: Recommends actual matched styling products with third-party web routing and deep-linking integrations.
+## ✨ Core Features
 
-✦ Modern Luxury Aesthetics: Editorial design featuring deep beiges, soft browns, warm off-whites, and charcoal typography.
+1. **Biometric Face Shape Analysis**:
+   - Detects and categorizes facial contour into 6 archetypes: **Oval**, **Round**, **Square**, **Heart**, **Diamond**, and **Oblong**.
+   - Dual-Mode: Interactive camera/gallery AI scan with fallback to **Manual Selection** for complete user control and privacy.
 
-🎨 Design Tokens
+2. **Skin Undertone Calibration**:
+   - Classifies base undertone into **Cool**, **Warm**, or **Neutral**.
+   - Supported by an interactive undertone guide and manual picker.
 
-Primary Contrast: 0xFFD8C3A5 (Deep Beige)
+3. **Curated Style Intelligence Reports**:
+   - **Dress Colours (35 Shades)**: 35 distinct named shades per undertone (Cool, Warm, Neutral) categorized into *Neutrals*, *Everyday*, *Soft/Pastels*, *Brights*, *Jewel/Rich*, and *Deep Shades*. Features interactive tap-to-inspect detail bottom sheet with enlarged preview, hex copy, and "Try Similar Shades" neighboring palette recommendations.
+   - **Glasses / Frame Shapes**: 5–8 tailored frame geometries (Cat-eye, Rectangle, Oval, Round, Browline, Wayfarer, Geometric, Aviator) with horizontal carousel and responsive grid view modes.
+   - **Hairstyles**: 5–8 haircut silhouettes tailored by face geometry, with Female/Male silhouette filters and Short / Medium / Long hair length chips.
+   - **Explanations & Insights**: Scientific and aesthetic rationales explaining *why* each styling element suits the diagnosed shape and undertone.
 
-Secondary Highlights: 0xFF8E735B (Soft Brown)
+---
 
-Background Canvas: 0xFFFAF7F2 (Warm Off-White)
+## 🎨 Design Tokens & Aesthetic System
 
-Main Typography: 0xFF2D2D2D (Dark Charcoal)
+FaceCard features a soft, elegant, Gen-Z-friendly fashion editorial look:
 
-🛠️ Installation & Setup
+| Token | Hex Value | Role |
+| :--- | :--- | :--- |
+| **Background Canvas** | `#F6F1FF` | Main application background |
+| **Primary Deep Plum** | `#5A2A83` | Brand identity, primary CTAs, active states |
+| **Secondary Lavender** | `#CDB4FF` | Accents, soft highlights, badges |
+| **Accent Dusty Pink** | `#E8A0BF` | Micro-accents, illustration highlights |
+| **Card Surface** | `#FFFFFF` | Crisp rounded cards with soft shadows |
+| **Main Typography** | `#2F243A` | Deep charcoal purple text |
+| **Soft Border** | `#E2D7F3` | Subtle card borders and dividers |
 
-Clone this repository:
+---
 
-git clone [https://github.com/YOUR_USERNAME/stylesense_ai.git](https://github.com/YOUR_USERNAME/stylesense_ai.git)
-cd stylesense_ai
+## 🔌 Flask REST API Data Contract
 
+The Flutter client cleanly interfaces with a **Python Flask + PostgreSQL** backend via `FaceCardApiService`:
 
-Retrieve Flutter packages:
+### Endpoint: `POST /api/analyze`
 
-flutter pub get
+#### Request Format
+- **AI Mode**: `multipart/form-data` with image file under `image` field.
+- **Manual Mode**: `application/json` payload:
+```json
+{
+  "mode": "manual",
+  "face_shape": "Oval",
+  "undertone": "Warm"
+}
+```
 
+#### Standard Response Format
+```json
+{
+  "success": true,
+  "face_shape": "Oval",
+  "undertone": "Warm",
+  "explanations": {
+    "face_shape_reason": "Your face exhibits an egg-like contour where forehead width is slightly greater than the rounded jawline. Proportions are naturally balanced and symmetrical.",
+    "undertone_reason": "Subsurface golden, honey, and peachy tones glow effortlessly with rich earth tones and gold accents."
+  },
+  "recommendations": {
+    "colours": [
+      "Espresso",
+      "Warm Charcoal",
+      "Terracotta",
+      "Olive Green",
+      "Mustard Gold"
+    ],
+    "glasses": [
+      {
+        "name": "Geometric Square Frames",
+        "reason": "Structured straight lines balance softer oval cheek contours with modern definition."
+      },
+      {
+        "name": "Classic Cat-Eye Frames",
+        "reason": "Subtle upward sweep lifts the eyes and accentuates cheekbone symmetry."
+      }
+    ],
+    "hairstyles": [
+      {
+        "name": "Long Layered Waves",
+        "length": "Long",
+        "reason": "Frames naturally balanced facial contours with fluid, graceful movement."
+      },
+      {
+        "name": "Curtain Bangs with Lob",
+        "length": "Medium",
+        "reason": "Soft cheek-grazing fringe draws immediate focus to eyes and cheekbones."
+      }
+    ]
+  }
+}
+```
 
-Verify Device Connection:
-Make sure an iOS Simulator, Android Emulator, or physical device is active:
+> **Offline & Demo Resiliency**: If the Flask backend is offline or unreachable during demonstrations, `FaceCardApiService` gracefully triggers its built-in rule-based calculation engine, guaranteeing a seamless presentation experience.
 
-flutter devices
+---
 
+## 🛠️ Installation & Setup
 
-Launch Application:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/facecard.git
+   cd facecard
+   ```
 
-flutter run
+2. **Retrieve Flutter packages:**
+   ```bash
+   flutter pub get
+   ```
 
+3. **Verify connected devices:**
+   ```bash
+   flutter devices
+   ```
 
-📁 Repository Directory Structure
+4. **Launch the application:**
+   ```bash
+   flutter run
+   ```
 
-stylesense_ai/
-├── .gitignore
+---
+
+## 📁 Repository Directory Structure
+
+```text
+facecard/
 ├── README.md
 ├── pubspec.yaml
 └── lib/
-    └── main.dart
+    ├── main.dart
+    ├── models/
+    │   └── analysis_response.dart
+    ├── services/
+    │   └── api_service.dart
+    ├── theme/
+    │   └── app_palette.dart
+    └── screens/
+        ├── splash_screen.dart
+        ├── welcome_screen.dart
+        ├── auth_screen.dart
+        ├── home_screen.dart
+        ├── ai_analysis_screen.dart
+        ├── manual_shape_screen.dart
+        ├── manual_undertone_screen.dart
+        ├── processing_screen.dart
+        ├── results_screen.dart
+        └── profile_screen.dart
+```
 
+---
 
-📝 Licence
+## 📝 License
 
-This repository is open-sourced under the MIT License.
+This project is licensed under the MIT License.

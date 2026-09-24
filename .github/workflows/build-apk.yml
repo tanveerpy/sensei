@@ -7,15 +7,15 @@ on:
 
 jobs:
   build:
-    name: Build APK
+    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -29,7 +29,7 @@ jobs:
       - name: Bootstrap Flutter Project
         run: |
           # 1. Create a standard Flutter project layout
-          flutter create app_build
+          flutter create --project-name facecard app_build
           
           # 2. Copy the main source file
           cp flutter_application_source.dart app_build/lib/main.dart
@@ -37,8 +37,7 @@ jobs:
           # 3. Use the provided flutter configuration as pubspec.yaml
           cp flutter_configuration.yaml app_build/pubspec.yaml
           
-          # 4. Remove assets/fonts block from pubspec.yaml if they are missing
-          # (Otherwise the flutter build will fail looking for local fonts/images)
+          # 4. Remove assets/fonts block from pubspec.yaml if unbundled
           sed -i '/assets:/,$d' app_build/pubspec.yaml
           
       - name: Get Dependencies
@@ -54,5 +53,7 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: StyleSense-Release-APK
+          name: FaceCard-Release-APK
           path: app_build/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
