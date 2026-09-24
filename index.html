@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaceCard - Find what suits you.</title>
+  <!-- Favicon: Adapted Simplified FaceCard App Icon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120'%3E%3Crect x='8' y='8' width='84' height='104' rx='16' fill='%23FFFFFF' stroke='%235A2A83' stroke-width='6'/%3E%3Cpath d='M33 42C33 28 67 28 67 42C67 36 73 45 68 56C65 63 62 68 62 75' fill='none' stroke='%235A2A83' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M38 48C38 64 43 76 50 82C57 76 62 64 62 52' fill='none' stroke='%235A2A83' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='48' cy='52' r='2' fill='%235A2A83'/%3E%3Cpath d='M47 69C49 71 52 71 54 69' fill='none' stroke='%23E8A0BF' stroke-width='5' stroke-linecap='round'/%3E%3Cpath d='M82 12L85 22L95 25L85 28L82 38L79 28L69 25L79 22Z' fill='%23F5B041'/%3E%3C/svg%3E">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Plus Jakarta Sans & Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fc: {
+              bg: '#F6F1FF',          // Main Background
+              primary: '#5A2A83',     // Primary buttons / nav / headings (Deep Plum)
+              lavender: '#CDB4FF',    // Secondary Lavender
+              accentPink: '#E8A0BF',  // Accent Pink
+              card: '#FFFFFF',        // Pure White Cards
+              text: '#2F243A',        // Main Text (Deep charcoal purple)
+              border: '#E2D7F3',      // Soft borders / dividers
+              plumDark: '#431B64',
+              plumLight: '#7439A5',
+              lavenderLight: '#F0E8FF'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif']
+          },
+          boxShadow: {
+            card: '0 4px 20px -2px rgba(90, 42, 131, 0.08), 0 2px 6px -1px rgba(90, 42, 131, 0.04)',
+            glow: '0 0 25px rgba(205, 180, 255, 0.5)',
+            plum: '0 8px 24px -4px rgba(90, 42, 131, 0.35)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F6F1FF;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CDB4FF;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5A2A83;
+    }
+
+    .phone-frame {
+      box-shadow: 0 25px 60px -15px rgba(67, 27, 100, 0.35), 0 0 0 10px #1E1728;
+    }
+
+    /* Scan line animation for camera simulation */
+    @keyframes scanMove {
+      0% { top: 8%; opacity: 0.8; }
+      50% { top: 92%; opacity: 1; }
+      100% { top: 8%; opacity: 0.8; }
+    }
+    .scanner-laser {
+      animation: scanMove 2.2s ease-in-out infinite;
+    }
+
+    /* Pulse animation for face mesh */
+    @keyframes pulseAura {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.04); opacity: 0.95; }
+    }
+    .pulse-aura {
+      animation: pulseAura 2s ease-in-out infinite;
+    }
+
+    /* Shimmer effect for sparkle */
+    @keyframes sparkleRotate {
+      0% { transform: rotate(0deg) scale(0.9); filter: drop-shadow(0 0 2px #FFD700); }
+      50% { transform: rotate(180deg) scale(1.25); filter: drop-shadow(0 0 8px #FFD700); }
+      100% { transform: rotate(360deg) scale(0.9); filter: drop-shadow(0 0 2px #FFD700); }
+    }
+    .sparkle-anim {
+      animation: sparkleRotate 4s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-[#ECE4F9] text-fc-text font-sans min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 selection:bg-fc-lavender selection:text-fc-primary">
+
+  <!-- Main Mobile App Frame Simulation -->
+  <div class="phone-frame w-full max-w-[400px] h-[820px] bg-black rounded-[46px] p-2.5 relative flex flex-col overflow-hidden shadow-2xl">
+    
+    <!-- Phone Dynamic Island & Camera Notch -->
+    <div class="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-50 flex items-center justify-between px-3">
+      <div class="w-2.5 h-2.5 bg-[#171220] rounded-full"></div>
+      <div class="w-8 h-1 bg-[#171220] rounded-full"></div>
+      <div class="w-2 h-2 bg-[#120d1a] rounded-full"></div>
+    </div>
+
+    <!-- Screen Shell -->
+    <div class="w-full h-full bg-fc-bg rounded-[38px] overflow-hidden relative flex flex-col select-none">
+      
+      <!-- System Status Bar -->
+      <div class="h-9 px-6 pt-2 flex justify-between items-center text-[11px] font-semibold text-fc-text/75 z-40 shrink-0">
+        <span id="system-time">10:45 AM</span>
+        <div class="flex items-center gap-1.5">
+          <i class="fa-solid fa-signal text-[10px]"></i>
+          <i class="fa-solid fa-wifi text-[10px]"></i>
+          <div class="flex items-center gap-0.5 border border-fc-text/40 rounded-sm px-0.5 py-px">
+            <div class="w-3.5 h-1.5 bg-fc-primary rounded-xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Viewport (Dynamically Injected Router) -->
+      <div id="viewport" class="flex-grow overflow-y-auto relative flex flex-col">
+        <!-- Content will be rendered by router() -->
+      </div>
+
+      <!-- Bottom System Home Indicator -->
+      <div class="h-4 w-full bg-transparent flex justify-center items-center pb-1 shrink-0 z-40">
+        <div class="w-28 h-1 bg-fc-text/25 rounded-full"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hidden File Input for Real Gallery / Photo Upload -->
+  <input type="file" id="real-image-uploader" accept="image/*" class="hidden" onchange="handleRealImageUpload(event)">
+  <!-- Hidden File Input for Mobile Native Camera Capture fallback -->
+  <input type="file" id="real-camera-capture-fallback" accept="image/*" capture="user" class="hidden" onchange="handleRealImageUpload(event)">
+
+  <!-- Modal: Live Camera Viewfinder & Capture with Permissions Handling -->
+  <div id="camera-modal" class="fixed inset-0 bg-black/80 items-center justify-center p-4 z-[99999] hidden flex backdrop-blur-md">
+    <div class="w-full max-w-sm bg-[#1A1024] rounded-3xl p-5 border border-fc-lavender/30 shadow-2xl text-center flex flex-col relative text-white">
+      <!-- Close / Dismiss Button -->
+      <button onclick="stopCameraStream()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition text-sm z-20">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="mb-3 text-left">
+        <span class="text-[9px] font-extrabold uppercase tracking-wider text-fc-lavender flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Live Camera Viewfinder
+        </span>
+        <h3 class="font-serif text-lg font-bold text-white mt-0.5">Position Your Face</h3>
+        <p class="text-[11px] text-white/70 mt-0.5">Align your face inside the target frame in good lighting.</p>
+      </div>
+
+      <!-- Video Feed Container with Face Contour Target Overlay -->
+      <div class="relative w-full h-72 rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-white/10 shadow-inner">
+        <!-- Live Video Element -->
+        <video id="camera-video-stream" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
+        
+        <!-- Offline / Permission Denied State -->
+        <div id="camera-error-state" class="hidden absolute inset-0 bg-black/90 p-5 flex flex-col items-center justify-center text-center z-10">
+          <div class="w-12 h-12 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-xl mb-3">
+            <i class="fa-solid fa-camera-slash"></i>
+          </div>
+          <h4 class="text-sm font-bold text-white">Camera Access Needed</h4>
+          <p id="camera-error-msg" class="text-[11px] text-white/70 mt-1 leading-relaxed">
+            Please allow camera permissions in your browser or choose a photo from your gallery.
+          </p>
+          <div class="mt-4 flex flex-col gap-2 w-full">
+            <button onclick="requestCameraPermissionsAndStart()" class="w-full py-2 bg-fc-primary text-white text-xs font-bold rounded-xl shadow-plum hover:bg-fc-plumDark transition">
+              Retry Camera Access
+            </button>
+            <button onclick="fallbackToDeviceCamera()" class="w-full py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition">
+              Use Native Device Camera
+            </button>
+          </div>
+        </div>
+
+        <!-- Visual Face Contour Guide Overlay -->
+        <div id="camera-overlay-guide" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <div class="w-36 h-48 rounded-[38px] border-2 border-dashed border-fc-lavender/70 flex items-center justify-center relative shadow-[0_0_20px_rgba(205,180,255,0.3)]">
+            <div class="absolute top-2 w-16 h-1 bg-fc-lavender/50 rounded-full"></div>
+            <div class="w-2 h-2 rounded-full bg-fc-lavender/60"></div>
+          </div>
+          <span class="mt-2 text-[9px] font-bold uppercase tracking-wider text-fc-lavender/80 bg-black/40 px-2 py-0.5 rounded-full backdrop-blur-xs">
+            Align Face Here
+          </span>
+        </div>
+      </div>
+
+      <!-- Controls Row: Capture, Switch Camera, Cancel -->
+      <div class="mt-4 flex items-center justify-between px-3">
+        <button onclick="switchCameraFacing()" title="Flip Camera" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-95 text-white/80 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-rotate text-sm"></i>
+        </button>
+
+        <!-- Large Shutter Button -->
+        <button onclick="captureCameraSnapshot()" class="w-16 h-16 rounded-full bg-white p-1 shadow-lg hover:scale-105 active:scale-95 transition flex items-center justify-center">
+          <div class="w-13 h-13 rounded-full border-2 border-fc-primary bg-fc-primary/10 flex items-center justify-center text-fc-primary text-xl">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+        </button>
+
+        <button onclick="stopCameraStream()" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-95 text-white/80 hover:text-white flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Canvas for Snapshot Freezing -->
+  <canvas id="camera-snapshot-canvas" class="hidden"></canvas>
+
+  <!-- Modal: Guest Save Prompt Dialog -->
+  <div id="guest-modal" class="fixed inset-0 bg-black/60 items-center justify-center p-4 z-[9999] hidden flex backdrop-blur-xs">
+    <div class="w-full max-w-xs bg-white rounded-3xl p-5 border border-fc-border shadow-2xl text-center flex flex-col">
+      <div class="w-12 h-12 rounded-2xl bg-fc-lavenderLight mx-auto flex items-center justify-center text-fc-primary text-xl mb-3">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+      </div>
+      <h3 class="font-serif text-base font-bold text-fc-primary">Save to Profile</h3>
+      <p class="text-[11px] text-fc-text/75 mt-1.5 leading-relaxed">
+        You are currently using <strong>FaceCard</strong> as a Guest. Log in or create an account to permanently preserve your reports in your style history!
+      </p>
+
+      <div class="space-y-2 mt-5">
+        <button onclick="closeGuestModalAndAuth('signup')" class="w-full py-2.5 bg-fc-primary text-white text-xs font-bold rounded-xl shadow-plum hover:bg-fc-plumDark transition">
+          Create Account / Log In
+        </button>
+        <button onclick="saveGuestLocally()" class="w-full py-2 bg-fc-bg border border-fc-border text-fc-text text-xs font-semibold rounded-xl hover:bg-fc-lavenderLight transition">
+          Save in Current Session Only
+        </button>
+        <button onclick="closeGuestModal()" class="w-full py-1 text-fc-text/50 text-[10px] font-semibold hover:text-fc-primary">
+          Dismiss
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Color Swatch Detail & "Try Similar Shades" -->
+  <div id="color-detail-modal" class="fixed inset-0 bg-black/60 items-center justify-center p-4 z-[9999] hidden flex backdrop-blur-xs">
+    <div class="w-full max-w-sm bg-white rounded-3xl p-5 border border-fc-border shadow-2xl text-left flex flex-col relative">
+      <!-- Close Button -->
+      <button onclick="closeColorDetail()" class="absolute top-4 right-4 w-7 h-7 rounded-full bg-fc-bg hover:bg-fc-lavenderLight flex items-center justify-center text-fc-text/60 hover:text-fc-primary transition text-xs">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Enlarged Color Swatch View -->
+      <div id="detail-color-swatch" class="w-full h-36 rounded-2xl shadow-inner border border-black/10 relative overflow-hidden flex items-end p-3 transition-colors duration-300">
+        <div class="bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg text-white font-mono text-xs tracking-wider flex items-center gap-1.5">
+          <span id="detail-color-hex-tag">#000000</span>
+        </div>
+      </div>
+
+      <!-- Shade Info -->
+      <div class="mt-3.5 flex items-start justify-between">
+        <div>
+          <h3 id="detail-color-name" class="font-serif text-lg font-bold text-fc-primary">Shade Name</h3>
+          <div class="flex items-center gap-2 mt-1">
+            <span id="detail-color-cat" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-fc-lavenderLight text-fc-primary border border-fc-border">Category</span>
+            <span id="detail-color-undertone" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-fc-bg text-fc-text/70 border border-fc-border">Cool Undertone</span>
+          </div>
+        </div>
+        <button id="detail-copy-btn" onclick="copyCurrentDetailHex()" class="px-3 py-1.5 bg-fc-primary hover:bg-fc-plumDark active:scale-95 text-white text-[10px] font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs shrink-0">
+          <i class="fa-regular fa-copy"></i>
+          <span>Copy Hex</span>
+        </button>
+      </div>
+
+      <!-- "Try Similar Shades" Section -->
+      <div class="mt-4 pt-3.5 border-t border-fc-border">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-fc-primary flex items-center gap-1">
+            <span>Try Similar Shades</span>
+            <span class="text-[11px]">✦</span>
+          </span>
+          <span class="text-[9px] text-fc-text/50">Neighboring palette swatches</span>
+        </div>
+        <div id="detail-similar-shades" class="grid grid-cols-4 gap-2">
+          <!-- Dynamically populated neighboring swatches -->
+        </div>
+      </div>
+
+      <div class="mt-4 pt-2">
+        <button onclick="closeColorDetail()" class="w-full py-2 bg-fc-bg border border-fc-border text-fc-text text-xs font-semibold rounded-xl hover:bg-fc-lavenderLight transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast" class="fixed bottom-6 px-4 py-2.5 bg-fc-text text-white rounded-2xl shadow-xl border border-fc-border/40 font-medium text-xs translate-y-24 opacity-0 transition-all duration-300 z-[99999] flex items-center gap-2.5 pointer-events-none">
+    <div class="w-5 h-5 rounded-full bg-fc-accentPink flex items-center justify-center text-white text-[10px]">
+      <i class="fa-solid fa-check"></i>
+    </div>
+    <span id="toast-text">Notification message</span>
+  </div>
+
+  <!-- JAVASCRIPT ENGINE & ROUTING -->
+  <script>
+    // State store
+    const state = {
+      user: {
+        username: 'Ayla Rose',
+        email: 'ayla@facecard.app',
+        gender: 'Female', // 'Female' | 'Male'
+        isLoggedIn: false,
+        isGuest: false
+      },
+      analysis: {
+        faceShape: 'Oval',     // Oval, Round, Square, Heart, Diamond, Oblong
+        undertone: 'Cool',      // Cool, Warm, Neutral
+        method: 'manual',      // 'photo' | 'manual'
+        uploadedImageUrl: null,
+        timestamp: null
+      },
+      savedResults: [
+        {
+          id: 1,
+          title: "Initial Analysis",
+          date: "Yesterday, 3:20 PM",
+          faceShape: "Oval",
+          undertone: "Cool"
+        }
+      ],
+      currentScreen: 'splash',
+      colorCategoryFilter: 'all'
+    };
+
+    // Keep system clock updated
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours();
+      let m = now.getMinutes();
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12;
+      h = h ? h : 12;
+      m = m < 10 ? '0' + m : m;
+      const el = document.getElementById('system-time');
+      if (el) el.textContent = `${h}:${m} ${ampm}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      if (!toast || !text) return;
+      text.textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 2500);
+    }
+
+    // Copy color hex to clipboard helper
+    function copyColorHex(hex, name) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(hex).catch(() => {});
+      }
+      showToast(`Copied ${name} (${hex}) to clipboard!`);
+    }
+
+    // =========================================================================
+    // SVG LOGO: SECOND LOGO CONCEPT
+    // Clean original female face illustration inside/over a card outline with a small sparkle
+    // =========================================================================
+    function getFaceCardLogoSvg(size = 90, showSparkle = true) {
+      return `
+        <div class="relative flex items-center justify-center" style="width: ${size}px; height: ${size * 1.18}px;">
+          <!-- Card Outline with delicate gradient -->
+          <svg viewBox="0 0 100 120" class="w-full h-full drop-shadow-md">
+            <defs>
+              <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFFFFF" />
+                <stop offset="100%" stop-color="#F4EDFD" />
+              </linearGradient>
+              <linearGradient id="cardBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#CDB4FF" />
+                <stop offset="50%" stop-color="#E8A0BF" />
+                <stop offset="100%" stop-color="#5A2A83" />
+              </linearGradient>
+              <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#5A2A83" />
+                <stop offset="100%" stop-color="#7439A5" />
+              </linearGradient>
+            </defs>
+
+            <!-- Card Body -->
+            <rect x="8" y="8" width="84" height="104" rx="14" fill="url(#cardGrad)" stroke="url(#cardBorder)" stroke-width="2.2" />
+
+            <!-- Card Corner Accents -->
+            <path d="M 16 22 L 22 22 M 16 22 L 16 28" stroke="#CDB4FF" stroke-width="1.2" stroke-linecap="round" fill="none" />
+            <path d="M 84 98 L 78 98 M 84 98 L 84 92" stroke="#CDB4FF" stroke-width="1.2" stroke-linecap="round" fill="none" />
+
+            <!-- Original Minimalist Female Face Line Illustration -->
+            <!-- Hair Wave -->
+            <path d="M 33 42 C 33 28, 67 28, 67 42 C 67 36, 73 45, 68 56 C 65 63, 62 68, 62 75" 
+                  fill="none" stroke="url(#lineGrad)" stroke-width="2" stroke-linecap="round" />
+            
+            <!-- Soft Side bangs swoop -->
+            <path d="M 35 44 C 44 40, 56 46, 62 52" 
+                  fill="none" stroke="url(#lineGrad)" stroke-width="1.8" stroke-linecap="round" />
+
+            <!-- Face Contour (Jawline and chin) -->
+            <path d="M 38 48 C 38 64, 43 76, 50 82 C 57 76, 62 64, 62 52" 
+                  fill="none" stroke="url(#lineGrad)" stroke-width="2" stroke-linecap="round" />
+
+            <!-- Delicate Brow and Closed Eye (original elegant look) -->
+            <path d="M 43 51 C 45 49, 48 49, 50 51" 
+                  fill="none" stroke="#5A2A83" stroke-width="1.3" stroke-linecap="round" />
+            <path d="M 44 54 C 46 56, 49 56, 51 54" 
+                  fill="none" stroke="#5A2A83" stroke-width="1.3" stroke-linecap="round" />
+
+            <!-- Small Nose line -->
+            <path d="M 50 57 L 49 63 L 52 64" 
+                  fill="none" stroke="#5A2A83" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- Gentle Smiling Lips -->
+            <path d="M 47 69 C 49 71, 52 71, 54 69" 
+                  fill="none" stroke="#E8A0BF" stroke-width="1.8" stroke-linecap="round" />
+
+            <!-- Neck line -->
+            <path d="M 47 82 L 47 88 M 53 82 L 53 88" 
+                  fill="none" stroke="#CDB4FF" stroke-width="1.4" stroke-linecap="round" />
+          </svg>
+
+          ${showSparkle ? `
+            <!-- Small Sparkle Accent at the card top-right -->
+            <div class="absolute -top-1 -right-1 text-[#F7B731] sparkle-anim pointer-events-none">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M12 0L14.2 9.8L24 12L14.2 14.2L12 24L9.8 14.2L0 12L9.8 9.8L12 0Z" fill="#F5B041" />
+              </svg>
+            </div>
+            <!-- Secondary tiny soft sparkle -->
+            <div class="absolute bottom-2 -left-1 text-fc-accentPink pointer-events-none opacity-80 scale-75">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 0L14.2 9.8L24 12L14.2 14.2L12 24L9.8 14.2L0 12L9.8 9.8L12 0Z" fill="#E8A0BF" />
+              </svg>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // DATA: 35 DRESS COLOURS PER UNDERTONE (COOL, WARM, NEUTRAL)
+    // =========================================================================
+    // DATA: 35 DRESS COLOURS PER UNDERTONE (COOL, WARM, NEUTRAL)
+    // Categorized by: Neutrals, Everyday, Soft/Pastels, Brights, Jewel/Rich, Deep Shades
+    // =========================================================================
+    const colorLibrary = {
+      Cool: {
+        description: "Your complexion radiates alongside icy, blue-based, and crisp jewel tones. Vivid jewel gems and crisp icy pastels make your natural cool undertone glow.",
+        colors: [
+          // 1-6: Neutrals
+          { name: "Charcoal", hex: "#36454F", cat: "Neutrals" },
+          { name: "Steel", hex: "#4682B4", cat: "Neutrals" },
+          { name: "Granite", hex: "#676767", cat: "Neutrals" },
+          { name: "Aluminum", hex: "#A9ACB6", cat: "Neutrals" },
+          { name: "Silver Shadow", hex: "#C0C0C0", cat: "Neutrals" },
+          { name: "Milk White", hex: "#F0F4F8", cat: "Neutrals" },
+          // 7-11: Everyday
+          { name: "Cool Brown", hex: "#5B4033", cat: "Everyday" },
+          { name: "Navy", hex: "#000080", cat: "Everyday" },
+          { name: "Pale Periwinkle", hex: "#C3CDE6", cat: "Everyday" },
+          { name: "Light Indigo", hex: "#4D5887", cat: "Everyday" },
+          { name: "Deep Periwinkle", hex: "#7B68EE", cat: "Everyday" },
+          // 12-16: Soft / Pastels
+          { name: "Pink Rose", hex: "#E37383", cat: "Soft/Pastels" },
+          { name: "Powder Pink", hex: "#FFB6C1", cat: "Soft/Pastels" },
+          { name: "Light Lemon", hex: "#FFFACD", cat: "Soft/Pastels" },
+          { name: "Baby Blue", hex: "#89CFF0", cat: "Soft/Pastels" },
+          { name: "Periwinkle", hex: "#CCCCFF", cat: "Soft/Pastels" },
+          // 17-21: Brights
+          { name: "Rose", hex: "#E0115F", cat: "Brights" },
+          { name: "Jade Green", hex: "#00A86B", cat: "Brights" },
+          { name: "Ocean Green", hex: "#48BF91", cat: "Brights" },
+          { name: "Cool Turquoise", hex: "#3EB489", cat: "Brights" },
+          { name: "Soft Magenta", hex: "#D473D4", cat: "Brights" },
+          // 22-27: Jewel / Rich
+          { name: "Deep Sea", hex: "#015482", cat: "Jewel/Rich" },
+          { name: "Cobalt", hex: "#0047AB", cat: "Jewel/Rich" },
+          { name: "Ocean Blue", hex: "#20669B", cat: "Jewel/Rich" },
+          { name: "Lapis Lazuli", hex: "#26619C", cat: "Jewel/Rich" },
+          { name: "Soft Blue-Violet", hex: "#6A5ACD", cat: "Jewel/Rich" },
+          { name: "Amethyst", hex: "#9966CC", cat: "Jewel/Rich" },
+          // 28-35: Deep Shades
+          { name: "Burgundy", hex: "#800020", cat: "Deep Shades" },
+          { name: "Cranberry", hex: "#9E003A", cat: "Deep Shades" },
+          { name: "Strawberry", hex: "#C83F49", cat: "Deep Shades" },
+          { name: "Raspberry", hex: "#D21F3C", cat: "Deep Shades" },
+          { name: "Purple Mist", hex: "#8E7CC3", cat: "Deep Shades" },
+          { name: "Soft Violet", hex: "#9B59B6", cat: "Deep Shades" },
+          { name: "Soft Red-Violet", hex: "#A03472", cat: "Deep Shades" },
+          { name: "Orchid", hex: "#DA70D6", cat: "Deep Shades" }
+        ]
+      },
+      Warm: {
+        description: "Your undertones carry golden, amber, and sun-kissed warmth. Earthy hues, terracotta, rich spices, and golden ambers highlight your natural radiance.",
+        colors: [
+          // 1-6: Neutrals
+          { name: "Espresso", hex: "#362B28", cat: "Neutrals" },
+          { name: "Warm Charcoal", hex: "#3D3635", cat: "Neutrals" },
+          { name: "Cocoa", hex: "#5C4033", cat: "Neutrals" },
+          { name: "Camel", hex: "#C19A6B", cat: "Neutrals" },
+          { name: "Biscuit", hex: "#D8B589", cat: "Neutrals" },
+          { name: "Cream", hex: "#FFFDD0", cat: "Neutrals" },
+          // 7-11: Everyday
+          { name: "Mahogany", hex: "#4E2728", cat: "Everyday" },
+          { name: "Cinnamon", hex: "#7B3F00", cat: "Everyday" },
+          { name: "Olive", hex: "#808000", cat: "Everyday" },
+          { name: "Petrol Blue", hex: "#1D5D68", cat: "Everyday" },
+          { name: "Warm Navy", hex: "#1B263B", cat: "Everyday" },
+          // 12-18: Soft / Pastels
+          { name: "Peach", hex: "#FFE5B4", cat: "Soft/Pastels" },
+          { name: "Apricot", hex: "#FBCEB1", cat: "Soft/Pastels" },
+          { name: "Butter Yellow", hex: "#FFFD74", cat: "Soft/Pastels" },
+          { name: "Sage", hex: "#9CAF88", cat: "Soft/Pastels" },
+          { name: "Soft Aqua", hex: "#88D8C0", cat: "Soft/Pastels" },
+          { name: "Paprika Rose", hex: "#D95B66", cat: "Soft/Pastels" },
+          { name: "Salmon Rose", hex: "#F28E8E", cat: "Soft/Pastels" },
+          // 19-24: Brights
+          { name: "Tomato Red", hex: "#FF6347", cat: "Brights" },
+          { name: "Coral Red", hex: "#FF4040", cat: "Brights" },
+          { name: "Coral", hex: "#FF7F50", cat: "Brights" },
+          { name: "Marigold", hex: "#EAA221", cat: "Brights" },
+          { name: "Moss Green", hex: "#8A9A5B", cat: "Brights" },
+          { name: "Turquoise Blue", hex: "#00C5CD", cat: "Brights" },
+          // 25-29: Jewel / Rich
+          { name: "Jade", hex: "#387C44", cat: "Jewel/Rich" },
+          { name: "Peacock", hex: "#005F73", cat: "Jewel/Rich" },
+          { name: "Teal", hex: "#008080", cat: "Jewel/Rich" },
+          { name: "Warm Turquoise", hex: "#40E0D0", cat: "Jewel/Rich" },
+          { name: "Orchid", hex: "#BC6CA7", cat: "Jewel/Rich" },
+          // 30-35: Deep Shades
+          { name: "Rust", hex: "#B7410E", cat: "Deep Shades" },
+          { name: "Brick", hex: "#9C413A", cat: "Deep Shades" },
+          { name: "Terracotta", hex: "#E2725B", cat: "Deep Shades" },
+          { name: "Aubergine", hex: "#3D0735", cat: "Deep Shades" },
+          { name: "Plum", hex: "#673147", cat: "Deep Shades" },
+          { name: "Warm Magenta", hex: "#B83280", cat: "Deep Shades" }
+        ]
+      },
+      Neutral: {
+        description: "You possess a balanced harmony of warm and cool skin parameters. Muted jewel tones, sophisticated dusty shades, and elegant soft neutrals flatter you effortlessly.",
+        colors: [
+          // 1-6: Neutrals
+          { name: "Espresso", hex: "#3A2E2B", cat: "Neutrals" },
+          { name: "Taupe Charcoal", hex: "#484446", cat: "Neutrals" },
+          { name: "Mushroom", hex: "#BDAC9A", cat: "Neutrals" },
+          { name: "Mink", hex: "#887569", cat: "Neutrals" },
+          { name: "Latte", hex: "#C5A059", cat: "Neutrals" },
+          { name: "Soft White", hex: "#FAF9F6", cat: "Neutrals" },
+          // 7-11: Everyday
+          { name: "Rose Brown", hex: "#795152", cat: "Everyday" },
+          { name: "Olive Taupe", hex: "#6F6652", cat: "Everyday" },
+          { name: "Slate Blue", hex: "#6A7F96", cat: "Everyday" },
+          { name: "Denim Blue", hex: "#4B6E8C", cat: "Everyday" },
+          { name: "Soft Navy", hex: "#243342", cat: "Everyday" },
+          // 12-17: Soft / Pastels
+          { name: "Blush", hex: "#DE5D83", cat: "Soft/Pastels" },
+          { name: "Shell Pink", hex: "#FFD1DC", cat: "Soft/Pastels" },
+          { name: "Peach Beige", hex: "#ECC8B1", cat: "Soft/Pastels" },
+          { name: "Buttercream", hex: "#EFEAD8", cat: "Soft/Pastels" },
+          { name: "Powder Blue", hex: "#A6C8D8", cat: "Soft/Pastels" },
+          { name: "Periwinkle", hex: "#B4B8E1", cat: "Soft/Pastels" },
+          // 18-22: Brights
+          { name: "Watermelon", hex: "#FC6C85", cat: "Brights" },
+          { name: "Soft Coral", hex: "#F88379", cat: "Brights" },
+          { name: "Soft Gold", hex: "#D4AF37", cat: "Brights" },
+          { name: "Eucalyptus", hex: "#5F8575", cat: "Brights" },
+          { name: "Sage Green", hex: "#879E89", cat: "Brights" },
+          // 23-28: Jewel / Rich
+          { name: "Jade Mist", hex: "#76B599", cat: "Jewel/Rich" },
+          { name: "Sea Green", hex: "#2E8B57", cat: "Jewel/Rich" },
+          { name: "Muted Teal", hex: "#4A767A", cat: "Jewel/Rich" },
+          { name: "Storm Teal", hex: "#32525A", cat: "Jewel/Rich" },
+          { name: "Smoky Periwinkle", hex: "#747B96", cat: "Jewel/Rich" },
+          { name: "Orchid Rose", hex: "#BC6C84", cat: "Jewel/Rich" },
+          // 29-35: Deep Shades
+          { name: "Bittersweet", hex: "#8A3324", cat: "Deep Shades" },
+          { name: "Muted Berry", hex: "#994D66", cat: "Deep Shades" },
+          { name: "Dusty Rose", hex: "#DCAE96", cat: "Deep Shades" },
+          { name: "Mauve Taupe", hex: "#915F6D", cat: "Deep Shades" },
+          { name: "Soft Plum", hex: "#7A4E65", cat: "Deep Shades" },
+          { name: "Berry Pink", hex: "#C74375", cat: "Deep Shades" },
+          { name: "Rosewood", hex: "#65000B", cat: "Deep Shades" }
+        ]
+      }
+    };
+
+    // =========================================================================
+    // DATA: 6-8 GLASSES FRAMES PER FACE SHAPE
+    // =========================================================================
+    const framesLibrary = {
+      Oval: [
+        { name: "Cat-Eye Accent Frames", icon: "👓", desc: "Complements balanced symmetry while subtly uplifting the high cheekbones." },
+        { name: "Geometric Hexagon Frames", icon: "🕶️", desc: "Adds architectural structure without disturbing your organic equilibrium." },
+        { name: "Classic Wayfarer", icon: "👓", desc: "Matches natural forehead and jaw width seamlessly for effortless versatility." },
+        { name: "Teardrop Aviator", icon: "🕶️", desc: "Flows organically along cheek contours with timeless chic appeal." },
+        { name: "Square Statement Frames", icon: "👓", desc: "Introduces refined crisp contrast to soft curves along the temples." },
+        { name: "Round Wire Frames", icon: "👓", desc: "Highlights soft facial proportions with a literary, minimalist touch." },
+        { name: "Browline Clubmaster", icon: "👓", desc: "Draws attention upwards to the eyes, beautifully framing your gaze." }
+      ],
+      Round: [
+        { name: "Rectangular Acetate Frames", icon: "👓", desc: "Crisp straight angles contrast softly curved cheeks to elongate the face." },
+        { name: "Bold Square Silhouette", icon: "🕶️", desc: "Wide square lines break roundness and introduce striking facial definition." },
+        { name: "Geometric D-Frame", icon: "👓", desc: "Deep vertical lens height creates vertical visual balance." },
+        { name: "Angular Cat-Eye", icon: "🕶️", desc: "Swept-up outer corners visually lift the cheekbones and sharpen proportions." },
+        { name: "Wayfarer Classic Bold", icon: "👓", desc: "Strong brow profile creates structure across the upper third of your face." },
+        { name: "Rimless Angular Frames", icon: "👓", desc: "Subtle sharp corners slim the cheeks without adding heavy visual weight." }
+      ],
+      Square: [
+        { name: "Soft Round Wire Frames", icon: "👓", desc: "Curved spherical rims gracefully soften strong, prominent jawlines." },
+        { name: "Oval Acetate Frames", icon: "👓", desc: "Gentle rounded geometry balances square angles with relaxed elegance." },
+        { name: "Classic Teardrop Aviator", icon: "🕶️", desc: "Sloping teardrop glass breaks square proportions for a flattering balance." },
+        { name: "Curvy Butterfly Frames", icon: "🕶️", desc: "Flared curved contours draw focus away from jaw corners towards the eyes." },
+        { name: "Thin Metal Round Frames", icon: "👓", desc: "Minimalist curves prevent harsh lines, creating a breezy, soft expression." },
+        { name: "Soft Rounded Cat-Eye", icon: "🕶️", desc: "Gentle upward sweep introduces fluid curves above defined cheekbones." }
+      ],
+      Heart: [
+        { name: "Bottom-Heavy Round Frames", icon: "👓", desc: "Adds visual fullness to the lower face, balancing a wider forehead." },
+        { name: "Light Metal Oval Frames", icon: "👓", desc: "Delicate light rims avoid overpowering a slender, delicate chin line." },
+        { name: "Rimless Minimalist Frames", icon: "👓", desc: "Keeps upper face light and airy while maintaining harmonious balance." },
+        { name: "Wayfarer Slim Silhouette", icon: "🕶️", desc: "Softly tapered lower rim mimics natural jawline tapers." },
+        { name: "Low-Bridge Round Eyewear", icon: "👓", desc: "Low nose bridge shifts visual weight downward for ideal equilibrium." },
+        { name: "Soft Hexagonal Frames", icon: "🕶️", desc: "Gentle geometric corners add interest without widening temple zones." }
+      ],
+      Diamond: [
+        { name: "Dramatic Cat-Eye Frames", icon: "🕶️", desc: "Accentuates striking diamond cheekbones while widening the upper temple." },
+        { name: "Oval Acetate Frames", icon: "👓", desc: "Curved contours soften high cheek angles for delicate harmony." },
+        { name: "Browline Clubmaster", icon: "👓", desc: "Emphasizes the browline to visually balance narrow temples and chin." },
+        { name: "Round Wire Frames", icon: "👓", desc: "Smooth circular edges balance pointed chins and angular cheek architecture." },
+        { name: "Soft Rectangular Frames", icon: "👓", desc: "Maintains balanced width across the eyes without clashing with cheekbones." },
+        { name: "Rimless Oval Spectacles", icon: "👓", desc: "Clean, ultra-light aesthetics complement dramatic sculpted features." }
+      ],
+      Oblong: [
+        { name: "Oversized Square Frames", icon: "🕶️", desc: "Deep vertical lenses break face length and create width across the cheeks." },
+        { name: "Wide Wayfarer Frames", icon: "👓", desc: "Extended horizontal width shortens the appearance of a longer face." },
+        { name: "Tall Round Silhouette", icon: "👓", desc: "Generous circular height fills mid-face space harmoniously." },
+        { name: "Thick Browline Frames", icon: "👓", desc: "Draws attention across the upper face, reducing vertical perception." },
+        { name: "Aviator Pilot Frames", icon: "🕶️", desc: "Broad top bar adds horizontal balance with timeless relaxed swagger." },
+        { name: "Rounded Square Spectacles", icon: "👓", desc: "Provides balanced coverage and proportion for extended face lengths." }
+      ]
+    };
+
+    // =========================================================================
+    // DATA: 6-8 HAIRSTYLES PER FACE SHAPE (FEMALE & MALE)
+    // =========================================================================
+    const hairstylesLibrary = {
+      Female: {
+        Oval: [
+          { name: "Long Layered Waves", length: "Long", icon: "💇‍♀️", desc: "Frames naturally balanced facial contours with fluid, graceful movement." },
+          { name: "Sleek French Bob", length: "Short", icon: "💇", desc: "Hugs the jawline cleanly, showcasing your symmetrical facial bone structure." },
+          { name: "Curtain Bangs with Lob", length: "Medium", icon: "✨", desc: "Soft cheek-grazing fringe draws immediate focus to the eyes and cheekbones." },
+          { name: "Textured Shag Cut", length: "Medium", icon: "✂️", desc: "Playful choppy layers add volume without overwhelming facial balance." },
+          { name: "High Slick Ponytail", length: "Long", icon: "👱‍♀️", desc: "Completely highlights your ideal natural proportions and bone symmetry." },
+          { name: "Beachy Midi Lob", length: "Medium", icon: "🌊", desc: "Effortless collarbone length adds movement that flatters day or evening wear." },
+          { name: "Half-Up Crown Bun", length: "Long", icon: "👑", desc: "Accentuates your natural symmetry while providing easy casual sophistication." }
+        ],
+        Round: [
+          { name: "High Voluminous Ponytail", length: "Long", icon: "👱‍♀️", desc: "Adds vertical crown height to elongate facial dimensions dramatically." },
+          { name: "Side-Parted Long Lob", length: "Medium", icon: "💇‍♀️", desc: "Asymmetrical diagonal parting breaks roundness and slims fuller cheeks." },
+          { name: "Textured Shaggy Bob", length: "Short", icon: "✂️", desc: "Uneven textured ends falling below chin line create an elongating silhouette." },
+          { name: "Face-Framing Tendrils", length: "Medium", icon: "✨", desc: "Soft wisps falling along cheeks narrow width and create vertical flow." },
+          { name: "Asymmetrical Pixie", length: "Short", icon: "💇", desc: "Height on top with tapered sides sculpts sharper facial angles instantly." },
+          { name: "Long Loose Cascading Curls", length: "Long", icon: "🌊", desc: "Weight at collarbone level draws gaze downward, slimming the face." }
+        ],
+        Square: [
+          { name: "Romantic Loose Waves", length: "Long", icon: "🌊", desc: "Soft billowy curves diffuse and counterbalance a strong, angular jawline." },
+          { name: "Wispy Curtain Bangs", length: "Medium", icon: "✨", desc: "Feathery forehead fringe softens temple corners and forehead angles." },
+          { name: "Shoulder-Length Layered Lob", length: "Medium", icon: "💇‍♀️", desc: "Layers starting past jaw level draw attention down from square corners." },
+          { name: "Deep Side Swept Part", length: "Medium", icon: "💇", desc: "Diagonal hair drape interrupts boxy lines for gentle feminine grace." },
+          { name: "Tousled Midi Shag", length: "Medium", icon: "✂️", desc: "Organic softness surrounds facial perimeter to minimize angularity." },
+          { name: "Soft Messy Low Bun", length: "Long", icon: "👱‍♀️", desc: "Loose front tendrils frame and soften the jaw with relaxed elegance." }
+        ],
+        Heart: [
+          { name: "Chin-Length Blunt Bob", length: "Short", icon: "💇", desc: "Adds visual width and body right at the narrower jawline for perfect balance." },
+          { name: "Shoulder-Length Bouncy Curls", length: "Medium", icon: "🌊", desc: "Fullness around neck and collarbone balances a broad forehead." },
+          { name: "Side-Swept Bangs", length: "Medium", icon: "✨", desc: "Sweeps diagonally across forehead to visually taper upper face width." },
+          { name: "Textured Midi Layers", length: "Medium", icon: "✂️", desc: "Airy bottom layers give volume where needed around a slender chin." },
+          { name: "Low Loose Chignon", length: "Long", icon: "👱‍♀️", desc: "Keeps volume situated low near nape of neck, harmonizing heart shapes." },
+          { name: "Soft Bixie Cut", length: "Short", icon: "💇‍♀️", desc: "Tapered top with fuller nape texture provides lovely proportional balance." }
+        ],
+        Diamond: [
+          { name: "Curtain Fringe Long Lob", length: "Medium", icon: "✨", desc: "Widens temple zone while showing off high sculpted diamond cheekbones." },
+          { name: "Deep Side Part with Waves", length: "Long", icon: "💇‍♀️", desc: "Asymmetrical volume softens angular cheeks and narrow temple lines." },
+          { name: "Chin-Grazing Wavy Bob", length: "Short", icon: "💇", desc: "Builds width at chin level to harmonize with prominent cheekbones." },
+          { name: "Bouncy Voluminous Blowout", length: "Long", icon: "🌊", desc: "Creates full movement around jawline for smooth, cohesive balance." },
+          { name: "Sleek Low Pony with Tendrils", length: "Long", icon: "👱‍♀️", desc: "Accentuates sharp cheek structure while softening chin edges." },
+          { name: "Soft Layered Shag", length: "Medium", icon: "✂️", desc: "Choppy bangs and textured ends flatter dramatic angular contours." }
+        ],
+        Oblong: [
+          { name: "Soft Full Fringe Bangs", length: "Medium", icon: "✨", desc: "Covers forehead to shorten vertical face length significantly and gracefully." },
+          { name: "Voluminous Side Curls", length: "Long", icon: "🌊", desc: "Horizontal body along the sides widens face profile for ideal proportions." },
+          { name: "Wavy French Bob", length: "Short", icon: "💇", desc: "Chin-length cut creates horizontal fullness, breaking vertical lines." },
+          { name: "Layered Shoulder-Length Lob", length: "Medium", icon: "💇‍♀️", desc: "Mid-length body prevents pulling the face downward visually." },
+          { name: "Side-Parted Hollywood Waves", length: "Long", icon: "✨", desc: "Wide undulating waves add glamorous lateral width across cheekbones." },
+          { name: "Fluffy Textured Shag", length: "Medium", icon: "✂️", desc: "Side volume and brow-skimming bangs craft a harmonious oval impression." }
+        ]
+      },
+      Male: {
+        Oval: [
+          { name: "Textured Quiff", length: "Short", icon: "✂️", desc: "Adds subtle crown volume while enhancing natural facial symmetry." },
+          { name: "Classic Taper Fade", length: "Short", icon: "💈", desc: "Neat clean graduation on sides with manageable, balanced length on top." },
+          { name: "Slicked Undercut", length: "Medium", icon: "💇‍♂️", desc: "Sharp contrast between disconnected sides and swept-back textured crown." },
+          { name: "Modern Pompadour", length: "Medium", icon: "✨", desc: "Elevates profile height effortlessly to accentuate oval proportions." },
+          { name: "Ivy League Cut", length: "Short", icon: "✂️", desc: "Refined side-parted crew cut tailored for timeless, clean contours." },
+          { name: "Messy Textured Fringe", length: "Medium", icon: "💇‍♂️", desc: "Relaxed front texture provides effortless youthful movement." },
+          { name: "Short Scissor Crop", length: "Short", icon: "✂️", desc: "Uniform scissor texture highlighting masculine bone structure." }
+        ],
+        Round: [
+          { name: "High Top Fade", length: "Short", icon: "💈", desc: "Substantial crown height visually stretches and elongates circular faces." },
+          { name: "Angular Textured Quiff", length: "Medium", icon: "✨", desc: "Sharp diagonal flow cuts across roundness to create structured angles." },
+          { name: "Side-Part Pompadour", length: "Medium", icon: "💇‍♂️", desc: "Distinct parting line and vertical volume disrupt soft curved boundaries." },
+          { name: "Textured French Crop with Taper", length: "Short", icon: "✂️", desc: "Tight faded sides slim facial cheeks while textured top provides vertical lift." },
+          { name: "Spiky Short Top with Mid-Fade", length: "Short", icon: "💈", desc: "Upward hair direction pulls visual attention up and away from full cheeks." },
+          { name: "Slicked Side-Sweep", length: "Medium", icon: "💇‍♂️", desc: "Asymmetrical lateral sweep introduces angular definition." }
+        ],
+        Square: [
+          { name: "Buzz Cut with Fade", length: "Short", icon: "💈", desc: "Embraces and celebrates strong chiselled jawlines with ultra-clean precision." },
+          { name: "Textured Crew Cut", length: "Short", icon: "✂️", desc: "Softly textured upper length diffuses harsh boxy contours." },
+          { name: "Classic Side Part", length: "Medium", icon: "💇‍♂️", desc: "Gentle diagonal parting line softens strong temple corners and jaw points." },
+          { name: "Messy Textured Quiff", length: "Medium", icon: "✨", desc: "Organic crown height breaks up the angularity of a broad forehead." },
+          { name: "Slicked Back with Taper", length: "Medium", icon: "💈", desc: "Smooth flowing lines counteract sharp cheekbone and jawline edges." },
+          { name: "French Crop with Soft Fringe", length: "Short", icon: "✂️", desc: "Slightly rounded front fringe balances rigid facial perimeters." }
+        ],
+        Heart: [
+          { name: "Mid-Length Layered Flow", length: "Medium", icon: "🌊", desc: "Collarbone-grazing fullness creates width around narrow chin and jawline." },
+          { name: "Textured Fringe with Soft Taper", length: "Medium", icon: "✂️", desc: "Down-swept fringe minimizes a broader forehead for balanced proportions." },
+          { name: "Side-Swept Quiff", length: "Medium", icon: "✨", desc: "Directs attention diagonally away from pointed chin towards hair texture." },
+          { name: "Shaggy Textured Crop", length: "Short", icon: "💇‍♂️", desc: "Airy perimeter volume softens wide temples and harmonizes chin silhouette." },
+          { name: "Classic Scissor Taper", length: "Medium", icon: "✂️", desc: "Avoids overly tight skin fades, preserving gentle side bulk around jaw." },
+          { name: "Wavy Side Part", length: "Medium", icon: "🌊", desc: "Soft undulating waves neutralize top-heavy facial architecture." }
+        ],
+        Diamond: [
+          { name: "Textured Comb Over Fade", length: "Medium", icon: "💇‍♂️", desc: "Broadens upper temple appearance while complementing prominent cheekbones." },
+          { name: "Medium Messy Flow with Fringe", length: "Medium", icon: "🌊", desc: "Forehead bangs and side body widen narrow hairline and chin points." },
+          { name: "Classic Pompadour", length: "Medium", icon: "✨", desc: "Rounded crown volume balances the sharpest angular cheek lines seamlessly." },
+          { name: "Low Fade with Textured Top", length: "Short", icon: "💈", desc: "Preserves adequate side fullness around temples to balance wide cheeks." },
+          { name: "Faux Hawk Fade", length: "Short", icon: "✂️", desc: "Central vertical styling aligns harmoniously with high chiselled cheekbones." },
+          { name: "Swept-Back Wavy Midi", length: "Medium", icon: "🌊", desc: "Loose movement around the ears fills out narrower upper/lower contours." }
+        ],
+        Oblong: [
+          { name: "Side Part with Low Taper", length: "Medium", icon: "💇‍♂️", desc: "Horizontal styling direction breaks vertical length without adding crown height." },
+          { name: "Crew Cut with Temple Fade", length: "Short", icon: "✂️", desc: "Keeps top short and sides moderate so the face does not look extended." },
+          { name: "Textured Crop with Blunt Bangs", length: "Short", icon: "✂️", desc: "Horizontal front fringe directly conceals forehead, shortening the vertical silhouette." },
+          { name: "Layered Scissor Cut", length: "Medium", icon: "💈", desc: "Full scissor-cut sides build lateral width to offset elongated face proportions." },
+          { name: "Caesar Cut", length: "Short", icon: "✨", desc: "Compact horizontal fringe creates width and anchors facial balance." },
+          { name: "Side Swept Brush Down", length: "Medium", icon: "💇‍♂️", desc: "Diagonal downward drape counterbalances elongated vertical dimensions." }
+        ]
+      }
+    };
+
+    // =========================================================================
+    // DATA: RULE-BASED BACKEND LOGIC MAPPING ("WHY IT SUITS YOU")
+    // Short contextual explanation blocks under dress colours, glasses, hairstyles
+    // =========================================================================
+    const whyItSuitsYouLibrary = {
+      colours: {
+        Warm: "Warm undertones usually harmonize well with earthy, golden, terracotta, and warm saturated shades, creating a healthy natural glow without washing you out.",
+        Cool: "Cool undertones naturally contrast with crisp jewel tones, icy pastels, and ocean blues, highlighting your rosy and cool subsurface skin radiance.",
+        Neutral: "Neutral undertones enjoy the versatility of both warm and cool spectrums, excelling in soft muted tones, jade greens, balanced pastels, and rich taupes."
+      },
+      glasses: {
+        Oval: "Your oval face has balanced proportions, so several frame shapes work well. Angular and geometric frames can add extra definition.",
+        Round: "Your round face has soft curves with similar width and length. Rectangular, angular, and cat-eye frames add structure and visually lengthen your face.",
+        Square: "Your square face features a strong jawline and broad forehead. Curved, round, and thin wire frames soften sharp angles and create harmonious equilibrium.",
+        Heart: "Your heart-shaped face tapers gracefully to a slender chin. Bottom-heavy, oval, and rimless frames add visual width to the lower half of your face.",
+        Diamond: "Your diamond face features striking cheekbones and narrow temples. Cat-eye and browline frames accentuate your cheek structure while softening angular lines.",
+        Oblong: "Your oblong face has an extended vertical silhouette. Oversized, tall frames and thick browlines break vertical length and add horizontal width."
+      },
+      hairstyles: {
+        Oval: "Your oval face exhibits natural structural symmetry. Versatile lengths, sleek cuts, and soft face-framing layers effortlessly showcase your bone structure.",
+        Round: "Your round face benefits from vertical height at the crown and diagonal, side-swept layers that elongate your facial lines and slim fuller cheeks.",
+        Square: "Your square face has distinct jaw angles. Soft romantic waves, textured shags, and wispy layers diffuse sharpness and add fluid movement.",
+        Heart: "Your heart face is wider at the forehead with a pointed chin. Chin-length bobs and collarbone fullness add visual width where your jaw narrows.",
+        Diamond: "Your diamond face shines with cheek-level width and delicate temple layers that accentuate high cheekbones while softening narrow hairlines.",
+        Oblong: "Your oblong face is elongated vertically. Fringe bangs, side-swept waves, and horizontal mid-length volume break length and restore equilibrium."
+      }
+    };
+
+    // =========================================================================
+    // BOTTOM NAVIGATION BAR COMPONENT
+    // Tabs: Home | Analyze | Results | Profile
+    // =========================================================================
+    function renderNavBar(activeTab = 'home') {
+      const tabs = [
+        { id: 'home', label: 'Home', icon: 'fa-solid fa-house' },
+        { id: 'analyze', label: 'Analyze', icon: 'fa-solid fa-wand-magic-sparkles' },
+        { id: 'results', label: 'Results', icon: 'fa-solid fa-palette' },
+        { id: 'profile', label: 'Profile', icon: 'fa-solid fa-user' }
+      ];
+
+      return `
+        <nav class="shrink-0 bg-white border-t border-fc-border px-3 py-2 flex justify-around items-center z-40 rounded-b-[36px]">
+          ${tabs.map(t => {
+            const isActive = t.id === activeTab;
+            return `
+              <button onclick="handleNavClick('${t.id}')" class="flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition duration-200 ${isActive ? 'text-fc-primary font-bold' : 'text-fc-text/45 hover:text-fc-primary font-medium'}">
+                <div class="relative">
+                  <i class="${t.icon} text-base ${isActive ? 'scale-110 text-fc-primary' : ''}"></i>
+                  ${isActive ? '<span class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-fc-primary rounded-full"></span>' : ''}
+                </div>
+                <span class="text-[10px] tracking-tight mt-0.5">${t.label}</span>
+              </button>
+            `;
+          }).join('')}
+        </nav>
+      `;
+    }
+
+    function handleNavClick(tab) {
+      if (tab === 'home') router('home');
+      else if (tab === 'analyze') router('analysis_choice');
+      else if (tab === 'results') router('results');
+      else if (tab === 'profile') router('profile');
+    }
+
+    // =========================================================================
+    // APPLICATION ROUTER
+    // =========================================================================
+    function router(screenId) {
+      state.currentScreen = screenId;
+      const viewport = document.getElementById('viewport');
+      if (!viewport) return;
+      viewport.innerHTML = '';
+
+      // -----------------------------------------------------------------------
+      // SCREEN 1: SPLASH SCREEN (Logo Concept 2 + Tagline)
+      // -----------------------------------------------------------------------
+      if (screenId === 'splash') {
+        viewport.innerHTML = `
+          <div class="flex-grow flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+            <div class="mb-5 transform scale-110">
+              ${getFaceCardLogoSvg(105, true)}
+            </div>
+            <h1 class="font-serif text-3xl font-bold text-fc-primary tracking-wide">FaceCard</h1>
+            <p class="text-xs text-fc-primary/85 font-semibold tracking-wide mt-1.5">Find what suits you.</p>
+            <div class="mt-8 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-fc-primary/30 animate-ping"></span>
+              <span class="w-2 h-2 rounded-full bg-fc-primary"></span>
+              <span class="w-2 h-2 rounded-full bg-fc-lavender"></span>
+            </div>
+          </div>
+        `;
+        setTimeout(() => {
+          if (state.currentScreen === 'splash') {
+            router('welcome');
+          }
+        }, 2200);
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 2: WELCOME SCREEN (Before Home: Log In, Create Account, Guest)
+      // -----------------------------------------------------------------------
+      else if (screenId === 'welcome') {
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full p-6 justify-between flex-grow">
+            <!-- Branding Header -->
+            <div class="pt-4 flex flex-col items-center text-center">
+              <div class="mb-3">
+                ${getFaceCardLogoSvg(80, true)}
+              </div>
+              <h2 class="font-serif text-2xl font-bold text-fc-primary">FaceCard</h2>
+              <p class="text-xs font-semibold text-fc-text/70 mt-0.5">Find what suits you.</p>
+            </div>
+
+            <!-- Visual Feature Preview Card -->
+            <div class="my-4 p-5 rounded-3xl bg-white border border-fc-border shadow-card relative overflow-hidden text-center">
+              <div class="w-12 h-12 mx-auto rounded-2xl bg-fc-lavenderLight flex items-center justify-center text-fc-primary text-xl mb-3">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <h3 class="font-serif text-sm font-bold text-fc-primary">Curated Face & Tone Analysis</h3>
+              <p class="text-[11px] text-fc-text/75 mt-1.5 leading-relaxed">
+                Discover 35 dress colours, tailored glasses frames, and hairstyles made for your face shape and undertone.
+              </p>
+              <div class="mt-3 flex justify-center gap-2 text-[10px] text-fc-primary/80 font-semibold">
+                <span class="px-2.5 py-1 bg-fc-bg rounded-full border border-fc-border">🎨 35 Shades</span>
+                <span class="px-2.5 py-1 bg-fc-bg rounded-full border border-fc-border">👓 Frames</span>
+                <span class="px-2.5 py-1 bg-fc-bg rounded-full border border-fc-border">💇 Hairstyles</span>
+              </div>
+            </div>
+
+            <!-- Welcome Actions: 3 Options -->
+            <div class="space-y-2.5 pb-2">
+              <button onclick="openAuth('login')" class="w-full py-3.5 bg-fc-primary hover:bg-fc-plumDark active:scale-[0.99] text-white text-xs uppercase tracking-wider font-bold rounded-2xl shadow-plum transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                Log In
+              </button>
+
+              <button onclick="openAuth('signup')" class="w-full py-3.5 bg-white hover:bg-fc-bg border-2 border-fc-primary/20 text-fc-primary text-xs uppercase tracking-wider font-bold rounded-2xl transition flex items-center justify-center gap-2 shadow-sm">
+                <i class="fa-solid fa-user-plus text-xs"></i>
+                Create Account
+              </button>
+
+              <button onclick="continueAsGuest()" class="w-full py-3 text-fc-text/75 hover:text-fc-primary text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                <span>Continue as Guest</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 3: AUTH SCREEN (Log In & Create Account Tabs)
+      // -----------------------------------------------------------------------
+      else if (screenId === 'auth') {
+        const activeTab = window.currentAuthTab || 'login';
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full p-5 flex-grow">
+            <!-- Top Back Header -->
+            <div class="flex items-center justify-between mb-3">
+              <button onclick="router('welcome')" class="text-fc-text/60 hover:text-fc-primary text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i> Back
+              </button>
+              <div class="scale-75">
+                ${getFaceCardLogoSvg(36, false)}
+              </div>
+            </div>
+
+            <!-- Auth Switch Tabs -->
+            <div class="flex border-b border-fc-border mb-4 bg-white/60 p-1 rounded-2xl">
+              <button id="auth-login-tab" onclick="switchAuthTab('login')" class="w-1/2 py-2 text-center text-xs font-bold rounded-xl transition ${activeTab === 'login' ? 'bg-fc-primary text-white shadow-sm' : 'text-fc-text/60 hover:text-fc-primary'}">
+                Log In
+              </button>
+              <button id="auth-signup-tab" onclick="switchAuthTab('signup')" class="w-1/2 py-2 text-center text-xs font-bold rounded-xl transition ${activeTab === 'signup' ? 'bg-fc-primary text-white shadow-sm' : 'text-fc-text/60 hover:text-fc-primary'}">
+                Create Account
+              </button>
+            </div>
+
+            <!-- Dynamic Form Container -->
+            <div id="auth-form-body" class="flex-grow overflow-y-auto pr-0.5">
+              ${renderAuthForm(activeTab)}
+            </div>
+          </div>
+        `;
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 4: HOME SCREEN
+      // Heading: "Find what suits you."
+      // Supporting text: "Discover colours, frames and hairstyles made for your features."
+      // Two prominent actions: "Analyze My Face" & "Choose Manually"
+      // -----------------------------------------------------------------------
+      else if (screenId === 'home') {
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full flex-grow">
+            <div class="p-5 flex-grow overflow-y-auto">
+              
+              <!-- Brand Top Bar -->
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                  <div class="scale-90">
+                    ${getFaceCardLogoSvg(40, true)}
+                  </div>
+                  <div>
+                    <h1 class="font-serif text-lg font-bold text-fc-primary leading-tight">FaceCard</h1>
+                    <span class="text-[9px] uppercase tracking-wider text-fc-primary/70 font-bold block">Style Diagnostics</span>
+                  </div>
+                </div>
+
+                <!-- User Badge -->
+                <div onclick="router('profile')" class="cursor-pointer flex items-center gap-1.5 px-2.5 py-1 bg-white border border-fc-border rounded-full shadow-xs hover:border-fc-primary transition">
+                  <div class="w-6 h-6 rounded-full bg-fc-lavender text-fc-primary font-bold text-[10px] flex items-center justify-center">
+                    ${state.user.isGuest ? 'G' : state.user.username.charAt(0).toUpperCase()}
+                  </div>
+                  <span class="text-[11px] font-semibold text-fc-text truncate max-w-[80px]">
+                    ${state.user.isGuest ? 'Guest' : state.user.username.split(' ')[0]}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Main Hero Banner -->
+              <div class="p-5 rounded-3xl bg-gradient-to-br from-fc-primary via-fc-plumLight to-fc-primary text-white shadow-plum relative overflow-hidden mb-5">
+                <div class="relative z-10">
+                  <span class="inline-block px-2.5 py-0.5 bg-white/15 backdrop-blur-xs rounded-full text-[9px] font-bold tracking-wider uppercase mb-2 text-fc-lavender">
+                    Personalized Styling
+                  </span>
+                  <h2 class="font-serif text-xl font-bold leading-snug">Find what suits you.</h2>
+                  <p class="text-xs text-white/85 mt-1 leading-relaxed max-w-[250px]">
+                    Discover colours, frames and hairstyles made for your features.
+                  </p>
+                </div>
+                <div class="absolute -right-4 -bottom-4 opacity-15 scale-125 text-white pointer-events-none">
+                  <i class="fa-solid fa-wand-magic-sparkles text-8xl"></i>
+                </div>
+              </div>
+
+              <!-- TWO PROMINENT ACTION CARDS (Analyze My Face vs Choose Manually) -->
+              <div class="space-y-3 mb-5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-fc-primary block px-0.5">Start Analysis</span>
+
+                <!-- Action 1: Analyze My Face -->
+                <div onclick="router('ai_analysis')" class="group p-4 bg-white hover:bg-fc-lavenderLight/50 border-2 border-fc-primary/30 hover:border-fc-primary rounded-2xl cursor-pointer shadow-card transition-all duration-200 flex items-center gap-3.5 relative">
+                  <div class="w-12 h-12 rounded-xl bg-fc-primary text-white flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition shadow-sm">
+                    <i class="fa-solid fa-camera"></i>
+                  </div>
+                  <div class="flex-grow">
+                    <div class="flex items-center gap-1.5">
+                      <h3 class="font-bold text-xs text-fc-text group-hover:text-fc-primary transition">Analyze My Face</h3>
+                      <span class="px-1.5 py-0.5 bg-fc-lavender text-fc-primary font-bold text-[8px] rounded uppercase">AI Scan</span>
+                    </div>
+                    <p class="text-[10px] text-fc-text/70 mt-0.5">Take a photo or upload from gallery to detect shape & undertone automatically.</p>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-fc-text/30 group-hover:text-fc-primary group-hover:translate-x-0.5 text-xs transition"></i>
+                </div>
+
+                <!-- Action 2: Choose Manually -->
+                <div onclick="router('manual_shape')" class="group p-4 bg-white hover:bg-fc-lavenderLight/50 border-2 border-fc-border hover:border-fc-lavender rounded-2xl cursor-pointer shadow-card transition-all duration-200 flex items-center gap-3.5 relative">
+                  <div class="w-12 h-12 rounded-xl bg-fc-lavender text-fc-primary flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition shadow-sm">
+                    <i class="fa-solid fa-sliders"></i>
+                  </div>
+                  <div class="flex-grow">
+                    <div class="flex items-center gap-1.5">
+                      <h3 class="font-bold text-xs text-fc-text group-hover:text-fc-primary transition">Choose Manually</h3>
+                      <span class="px-1.5 py-0.5 bg-fc-bg text-fc-text/70 font-semibold text-[8px] rounded uppercase">Direct</span>
+                    </div>
+                    <p class="text-[10px] text-fc-text/70 mt-0.5">Pick your face shape and skin undertone directly with visual guide cards.</p>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-fc-text/30 group-hover:text-fc-primary group-hover:translate-x-0.5 text-xs transition"></i>
+                </div>
+              </div>
+
+              <!-- Quick Info / Current Profile Summary Card -->
+              <div class="p-4 rounded-2xl bg-white border border-fc-border shadow-xs">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold text-fc-primary uppercase tracking-wider">Latest Profile Setting</span>
+                  <button onclick="router('results')" class="text-[10px] font-bold text-fc-primary hover:underline">View Results</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-center">
+                  <div class="p-2.5 bg-fc-bg rounded-xl border border-fc-border/60">
+                    <span class="text-[9px] text-fc-text/60 font-semibold block">Face Shape</span>
+                    <span class="text-xs font-bold text-fc-primary">${state.analysis.faceShape}</span>
+                  </div>
+                  <div class="p-2.5 bg-fc-bg rounded-xl border border-fc-border/60">
+                    <span class="text-[9px] text-fc-text/60 font-semibold block">Undertone</span>
+                    <span class="text-xs font-bold text-fc-primary">${state.analysis.undertone}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            ${renderNavBar('home')}
+          </div>
+        `;
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 5: ANALYSIS CHOICE
+      // -----------------------------------------------------------------------
+      else if (screenId === 'analysis_choice') {
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full flex-grow">
+            <div class="p-5 flex-grow overflow-y-auto">
+              <div class="mb-4">
+                <h2 class="font-serif text-xl font-bold text-fc-primary">Start Analysis</h2>
+                <p class="text-xs text-fc-text/70 mt-0.5">Select how you would like to assess your facial styling attributes.</p>
+              </div>
+
+              <div class="space-y-4 my-6">
+                <!-- Method 1: Analyze My Face -->
+                <div onclick="router('ai_analysis')" class="p-5 bg-white border-2 border-fc-primary/20 hover:border-fc-primary rounded-3xl cursor-pointer shadow-card transition duration-200">
+                  <div class="w-12 h-12 rounded-2xl bg-fc-primary text-white flex items-center justify-center text-xl mb-3">
+                    <i class="fa-solid fa-camera"></i>
+                  </div>
+                  <h3 class="font-serif text-sm font-bold text-fc-text">Analyze My Face</h3>
+                  <p class="text-xs text-fc-text/75 mt-1 leading-relaxed">
+                    Camera selfie or upload from device gallery. Our AI scans facial ratios and skin pigmentation automatically.
+                  </p>
+                  <div class="mt-4 flex items-center gap-2 text-xs font-bold text-fc-primary">
+                    <span>Take Photo / Upload</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                  </div>
+                </div>
+
+                <!-- Method 2: Choose Manually -->
+                <div onclick="router('manual_shape')" class="p-5 bg-white border-2 border-fc-border hover:border-fc-lavender rounded-3xl cursor-pointer shadow-card transition duration-200">
+                  <div class="w-12 h-12 rounded-2xl bg-fc-lavender text-fc-primary flex items-center justify-center text-xl mb-3">
+                    <i class="fa-solid fa-hand-pointer"></i>
+                  </div>
+                  <h3 class="font-serif text-sm font-bold text-fc-text">Choose Manually</h3>
+                  <p class="text-xs text-fc-text/75 mt-1 leading-relaxed">
+                    Directly pick your known face shape (Oval, Round, Square, etc.) and undertone with helpful descriptive hints.
+                  </p>
+                  <div class="mt-4 flex items-center gap-2 text-xs font-bold text-fc-primary">
+                    <span>Select Attributes</span>
+                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            ${renderNavBar('analyze')}
+          </div>
+        `;
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 6: AI ANALYSIS (Take Photo & Upload from Gallery)
+      // Does not force users directly into camera
+      // -----------------------------------------------------------------------
+      else if (screenId === 'ai_analysis') {
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full p-5 flex-grow">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-3">
+              <button onclick="router('home')" class="text-fc-text/60 hover:text-fc-primary text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i> Home
+              </button>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-fc-primary">Biometric Scan</span>
+            </div>
+
+            <div class="mb-4">
+              <h2 class="font-serif text-xl font-bold text-fc-primary">Analyze My Face</h2>
+              <p class="text-xs text-fc-text/70 mt-0.5">Choose your preferred photo source to begin analysis.</p>
+            </div>
+
+            <!-- Interactive Photo Simulation Canvas -->
+            <div class="my-2 p-5 rounded-3xl bg-white border border-fc-border shadow-card flex flex-col items-center justify-center text-center relative overflow-hidden h-52">
+              <div class="w-24 h-28 rounded-2xl border-2 border-dashed border-fc-lavender flex flex-col items-center justify-center text-fc-lavender relative pulse-aura">
+                <i class="fa-regular fa-user text-4xl mb-1"></i>
+                <span class="text-[8px] font-bold uppercase tracking-wider text-fc-primary">Face Target</span>
+              </div>
+              <p class="text-[10px] text-fc-text/60 mt-3 font-medium">Ensure even lighting and neutral expression</p>
+            </div>
+
+            <!-- Two Clear Options: Take Photo and Upload from Gallery -->
+            <div class="space-y-2.5 mt-auto pb-2">
+              <button onclick="triggerCameraScan()" class="w-full py-3.5 bg-fc-primary hover:bg-fc-plumDark active:scale-[0.99] text-white text-xs font-bold rounded-2xl shadow-plum transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-camera text-sm"></i>
+                Take Photo
+              </button>
+
+              <button onclick="triggerGalleryUpload()" class="w-full py-3.5 bg-white hover:bg-fc-bg border-2 border-fc-border text-fc-primary text-xs font-bold rounded-2xl transition flex items-center justify-center gap-2 shadow-xs">
+                <i class="fa-solid fa-images text-sm"></i>
+                Upload from Gallery
+              </button>
+
+              <button onclick="router('manual_shape')" class="w-full py-2 text-fc-text/70 hover:text-fc-primary text-xs font-semibold text-center transition">
+                Prefer manual selection?
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 7: ANALYSIS LOADING SCREEN (PROCESSING)
+      // -----------------------------------------------------------------------
+      else if (screenId === 'processing') {
+        const previewImg = state.analysis.uploadedImageUrl;
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full p-6 items-center justify-center text-center flex-grow">
+            <!-- Animated Subtle Pulsing Illustrated Face / Card Element -->
+            <div class="relative w-52 h-52 flex items-center justify-center mb-7">
+              <!-- Concentric Pulsing Aura Rings (No generic spinner) -->
+              <div class="absolute w-44 h-44 rounded-full bg-fc-secondary/15 animate-ping opacity-35" style="animation-duration: 3s;"></div>
+              <div class="absolute w-48 h-48 rounded-full border-2 border-fc-lavender/50 pulse-aura"></div>
+              <div class="absolute w-52 h-52 rounded-full border border-fc-lavenderLight/70 pulse-aura" style="animation-delay: 0.6s;"></div>
+
+              <!-- Illustrated Face / Card Container -->
+              <div class="w-32 h-32 rounded-3xl bg-white border border-fc-border shadow-card flex items-center justify-center relative z-10 pulse-aura">
+                ${previewImg ? `
+                  <div class="w-24 h-24 rounded-2xl overflow-hidden relative shadow-inner">
+                    <img src="${previewImg}" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 bg-fc-primary/10"></div>
+                  </div>
+                ` : `
+                  <div class="scale-105">
+                    ${getFaceCardLogoSvg(86, true)}
+                  </div>
+                `}
+              </div>
+            </div>
+
+            <!-- Sequential Text Update Section -->
+            <div class="min-h-[64px] flex flex-col items-center justify-center">
+              <h3 id="proc-title" class="font-serif text-xl font-bold text-fc-primary transition-opacity duration-300">Detecting your face…</h3>
+              <p id="proc-desc" class="text-xs text-fc-text/70 mt-1 max-w-[240px] transition-opacity duration-300">Aligning facial contour in balanced lighting…</p>
+            </div>
+
+            <!-- 4-Step Progress Indicator Pills (No generic spinner) -->
+            <div class="flex items-center gap-2 mt-6">
+              <div id="proc-step-0" class="h-1.5 w-6 rounded-full bg-fc-primary transition-all duration-300"></div>
+              <div id="proc-step-1" class="h-1.5 w-2 rounded-full bg-fc-border transition-all duration-300"></div>
+              <div id="proc-step-2" class="h-1.5 w-2 rounded-full bg-fc-border transition-all duration-300"></div>
+              <div id="proc-step-3" class="h-1.5 w-2 rounded-full bg-fc-border transition-all duration-300"></div>
+            </div>
+
+            <p class="text-[10px] text-fc-primary/60 font-semibold tracking-wider uppercase mt-4">
+              Facial proportions & undertone harmony
+            </p>
+          </div>
+        `;
+        runProcessingSequence();
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 8: MANUAL STEP 1 - CHOOSE YOUR FACE SHAPE
+      // Options: Oval, Round, Square, Heart, Diamond, Oblong / Rectangle
+      // Visual cards for every face shape, highlighting selected option
+      // -----------------------------------------------------------------------
+      else if (screenId === 'manual_shape') {
+        const shapes = [
+          { id: 'Oval', label: 'Oval', desc: 'Balanced proportions with softly curved jawline.', icon: 'M 50 15 C 32 15, 32 85, 50 85 C 68 85, 68 15, 50 15 Z' },
+          { id: 'Round', label: 'Round', desc: 'Equal length & width with soft curved cheek contours.', icon: 'M 50 15 C 28 15, 28 85, 50 85 C 72 85, 72 15, 50 15 Z' },
+          { id: 'Square', label: 'Square', desc: 'Strong angular jawline aligned with a broad forehead.', icon: 'M 32 20 L 68 20 L 68 76 L 32 76 Z' },
+          { id: 'Heart', label: 'Heart', desc: 'Wider forehead tapering elegantly down to a slender chin.', icon: 'M 50 82 L 28 35 C 26 22, 45 16, 50 30 C 55 16, 74 22, 72 35 Z' },
+          { id: 'Diamond', label: 'Diamond', desc: 'Dramatic high cheekbones with narrow forehead & chin.', icon: 'M 50 15 L 72 50 L 50 85 L 28 50 Z' },
+          { id: 'Oblong', label: 'Oblong / Rectangle', desc: 'Elongated vertical silhouette with straight cheek lines.', icon: 'M 34 14 L 66 14 L 66 86 L 34 86 Z' }
+        ];
+
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full p-5 flex-grow">
+            <!-- Back & Header -->
+            <div class="flex items-center justify-between mb-2">
+              <button onclick="router('home')" class="text-fc-text/60 hover:text-fc-primary text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i> Home
+              </button>
+              <span class="text-[10px] font-bold text-fc-primary">Step 1 of 2</span>
+            </div>
+
+            <div class="mb-4">
+              <h2 class="font-serif text-xl font-bold text-fc-primary">Choose your face shape</h2>
+              <p class="text-xs text-fc-text/70 mt-0.5">Select the silhouette that matches your facial contour.</p>
+            </div>
+
+            <!-- Face Shape Grid (6 Options with Visual Cards) -->
+            <div class="grid grid-cols-2 gap-2.5 flex-grow overflow-y-auto pr-0.5 pb-2">
+              ${shapes.map(s => {
+                const isSelected = state.analysis.faceShape === s.id;
+                return `
+                  <div onclick="selectManualShape('${s.id}')" class="p-3 rounded-2xl cursor-pointer border-2 transition-all duration-200 text-left relative flex flex-col justify-between ${isSelected ? 'bg-fc-lavenderLight/40 border-fc-primary shadow-card ring-2 ring-fc-primary/20' : 'bg-white border-fc-border hover:border-fc-lavender'}">
+                    <div>
+                      <!-- Illustration Placeholder -->
+                      <div class="w-full h-16 rounded-xl ${isSelected ? 'bg-white' : 'bg-fc-bg'} flex items-center justify-center mb-2 overflow-hidden border border-fc-border/40">
+                        <svg viewBox="0 0 100 100" class="w-12 h-12">
+                          <path d="${s.icon}" fill="none" stroke="${isSelected ? '#5A2A83' : '#A08BB8'}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                          <circle cx="42" cy="48" r="1.5" fill="${isSelected ? '#5A2A83' : '#A08BB8'}" opacity="0.6" />
+                          <circle cx="58" cy="48" r="1.5" fill="${isSelected ? '#5A2A83' : '#A08BB8'}" opacity="0.6" />
+                        </svg>
+                      </div>
+                      <h4 class="font-bold text-xs ${isSelected ? 'text-fc-primary' : 'text-fc-text'}">${s.label}</h4>
+                      <p class="text-[9px] ${isSelected ? 'text-fc-text' : 'text-fc-text/65'} mt-0.5 leading-tight">${s.desc}</p>
+                    </div>
+                    <div class="mt-2 flex justify-end">
+                      <div class="w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? 'border-fc-primary bg-fc-primary text-white' : 'border-fc-border bg-white'}">
+                        ${isSelected ? '<i class="fa-solid fa-check text-[8px]"></i>' : ''}
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Continue to Undertone Step -->
+            <div class="pt-3 pb-1">
+              <button onclick="router('manual_undertone')" class="w-full py-3.5 bg-fc-primary hover:bg-fc-plumDark active:scale-[0.99] text-white text-xs font-bold rounded-2xl shadow-plum transition flex items-center justify-center gap-2">
+                <span>Continue to Undertone</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 9: MANUAL STEP 2 - CHOOSE YOUR UNDERTONE
+      // Options: WARM, COOL, NEUTRAL with exact required descriptions
+      // -----------------------------------------------------------------------
+      else if (screenId === 'manual_undertone') {
+        const undertones = [
+          {
+            id: 'Warm',
+            name: 'WARM',
+            quote: '“Your skin tends to suit golden, peachy and earthy tones.”',
+            badge: 'Warm Radiance',
+            swatches: ['#FFCBA4', '#D4A017', '#C85A32', '#556B2F']
+          },
+          {
+            id: 'Cool',
+            name: 'COOL',
+            quote: '“Your skin tends to suit blue, rosy and jewel tones.”',
+            badge: 'Cool Radiance',
+            swatches: ['#F3A9BC', '#B0E0E6', '#0F52BA', '#5A2A83']
+          },
+          {
+            id: 'Neutral',
+            name: 'NEUTRAL',
+            quote: '“You can often wear a balance of warm and cool tones.”',
+            badge: 'Balanced Harmony',
+            swatches: ['#DCAE96', '#87A987', '#800020', '#386668']
+          }
+        ];
+
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full p-5 flex-grow">
+            <!-- Back & Header -->
+            <div class="flex items-center justify-between mb-2">
+              <button onclick="router('manual_shape')" class="text-fc-text/60 hover:text-fc-primary text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i> Face Shape
+              </button>
+              <span class="text-[10px] font-bold text-fc-primary">Step 2 of 2</span>
+            </div>
+
+            <div class="mb-4">
+              <h2 class="font-serif text-xl font-bold text-fc-primary">Choose your undertone</h2>
+              <p class="text-xs text-fc-text/70 mt-0.5">Select the undertone palette that harmonizes with your skin.</p>
+            </div>
+
+            <!-- Undertone Cards (WARM, COOL, NEUTRAL) with FaceCard Primary Highlight -->
+            <div class="space-y-3 flex-grow overflow-y-auto pr-0.5 pb-2">
+              ${undertones.map(u => {
+                const isSelected = state.analysis.undertone.toLowerCase() === u.id.toLowerCase();
+                return `
+                  <div onclick="selectManualUndertone('${u.id}')" class="p-4 rounded-2xl cursor-pointer border-2 transition-all duration-200 text-left ${isSelected ? 'bg-fc-lavenderLight/40 border-fc-primary shadow-card ring-2 ring-fc-primary/20' : 'bg-white border-fc-border hover:border-fc-lavender'}">
+                    <div class="flex items-start justify-between">
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <h4 class="font-bold text-sm tracking-wide ${isSelected ? 'text-fc-primary' : 'text-fc-text'}">${u.name}</h4>
+                          <span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${isSelected ? 'bg-fc-primary text-white' : 'bg-fc-bg text-fc-primary'}">
+                            ${u.badge}
+                          </span>
+                        </div>
+                        <p class="text-xs ${isSelected ? 'text-fc-primary font-medium' : 'text-fc-text/80'} mt-1.5 italic leading-relaxed">${u.quote}</p>
+                      </div>
+                      <div class="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ml-2 ${isSelected ? 'border-fc-primary bg-fc-primary text-white' : 'border-fc-border bg-white'}">
+                        ${isSelected ? '<i class="fa-solid fa-check text-[9px]"></i>' : ''}
+                      </div>
+                    </div>
+
+                    <!-- Swatch previews -->
+                    <div class="mt-3.5 flex items-center gap-1.5 pt-2.5 border-t border-fc-border/60">
+                      <span class="text-[9px] text-fc-text/60 font-semibold mr-1">Signature Tones:</span>
+                      ${u.swatches.map(hex => `
+                        <span class="w-5 h-5 rounded-full border border-black/10 shadow-xs" style="background-color: ${hex}"></span>
+                      `).join('')}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- Bottom Action: GET MY RECOMMENDATIONS -->
+            <div class="pt-3 pb-1">
+              <button onclick="submitManualSelections()" class="w-full py-3.5 bg-fc-primary hover:bg-fc-plumDark active:scale-[0.99] text-white text-xs font-bold rounded-2xl shadow-plum transition flex items-center justify-center gap-2 tracking-wide uppercase">
+                <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                <span>GET MY RECOMMENDATIONS</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // -----------------------------------------------------------------------
+      // -----------------------------------------------------------------------
+      // SCREEN 10: RESULTS SCREEN (Personalized Style Report)
+      // Contains: Face Shape, Undertone, 35 Dress Colours, 5-8 Glasses, 5-8 Hairstyles
+      // -----------------------------------------------------------------------
+      else if (screenId === 'results') {
+        const shape = state.analysis.faceShape || 'Oval';
+        const ut = state.analysis.undertone || 'Cool';
+        const palette = colorLibrary[ut] || colorLibrary['Cool'];
+        const frames = framesLibrary[shape] || framesLibrary['Oval'];
+        const activeFilter = state.colorCategoryFilter || 'all';
+        const glassesLayout = state.glassesLayout || 'carousel';
+
+        // Gender & length filter for hairstyles
+        const activeHairGender = state.hairstyleGender || state.user.gender || 'Female';
+        const activeHairLength = state.hairstyleLength || 'all';
+        const rawHairCatalog = hairstylesLibrary[activeHairGender] || hairstylesLibrary['Female'] || hairstylesLibrary;
+        const rawHairList = rawHairCatalog[shape] || rawHairCatalog['Oval'] || [];
+        const hair = activeHairLength === 'all'
+          ? rawHairList
+          : rawHairList.filter(h => (h.length || '').toLowerCase() === activeHairLength.toLowerCase());
+
+        // Filter colors
+        const filteredColors = activeFilter === 'all' 
+          ? palette.colors 
+          : palette.colors.filter(c => c.cat.toLowerCase() === activeFilter.toLowerCase());
+
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full flex-grow">
+            <!-- Results Header & Summary Card -->
+            <div class="p-4 bg-white border-b border-fc-border shrink-0">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h2 class="font-serif text-xl font-bold text-fc-primary">Analysis Complete ✨</h2>
+                  <p class="text-xs text-fc-text/70 mt-0.5">Your personalized recommendations are ready.</p>
+                </div>
+                <button onclick="saveCurrentResults()" class="px-3 py-1.5 bg-fc-bg hover:bg-fc-lavenderLight border border-fc-border rounded-xl text-fc-primary text-[10px] font-bold flex items-center gap-1.5 transition active:scale-95 shadow-xs">
+                  <i class="fa-solid fa-bookmark"></i>
+                  <span>Save</span>
+                </button>
+              </div>
+
+              <!-- Result-Summary Card ("YOUR FACECARD") -->
+              <div class="mt-3.5 p-3.5 rounded-2xl bg-white border-2 border-fc-border shadow-card">
+                <div class="flex items-center justify-between mb-2.5">
+                  <div class="flex items-center gap-1.5 text-fc-primary">
+                    <i class="fa-solid fa-id-card text-xs"></i>
+                    <span class="text-[10px] font-extrabold tracking-wider uppercase">YOUR FACECARD</span>
+                  </div>
+                  <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-fc-lavenderLight text-fc-primary border border-fc-border">
+                    Active Profile
+                  </span>
+                </div>
+
+                <!-- Visual Chips for Detected Face Shape & Undertone -->
+                <div class="grid grid-cols-2 gap-2">
+                  <!-- Face Shape Chip -->
+                  <div class="p-2.5 rounded-xl bg-fc-bg border border-fc-border/70 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-white border border-fc-border text-fc-primary flex items-center justify-center text-xs shrink-0 shadow-xs">
+                      <i class="fa-regular fa-face-smile"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                      <div class="text-[9px] uppercase font-bold text-fc-text/50">Face Shape</div>
+                      <div class="text-xs font-bold text-fc-primary truncate">${shape}</div>
+                    </div>
+                  </div>
+
+                  <!-- Undertone Chip -->
+                  <div class="p-2.5 rounded-xl bg-fc-bg border border-fc-border/70 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-white border border-fc-border text-fc-primary flex items-center justify-center text-xs shrink-0 shadow-xs">
+                      <i class="fa-solid fa-palette"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                      <div class="text-[9px] uppercase font-bold text-fc-text/50">Undertone</div>
+                      <div class="text-xs font-bold text-fc-primary truncate">${ut}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- "Not quite right?" Quick Edit Section -->
+                <div class="mt-3 pt-2.5 border-t border-fc-border/70 flex items-center justify-between text-xs">
+                  <span class="text-[10px] font-semibold text-fc-text/80">Not quite right?</span>
+                  <div class="flex items-center gap-1.5">
+                    <button onclick="toggleQuickEdit('shape')" class="px-2 py-1 rounded-lg border border-fc-primary text-fc-primary hover:bg-fc-primary hover:text-white transition text-[9px] font-bold">
+                      EDIT FACE SHAPE
+                    </button>
+                    <button onclick="toggleQuickEdit('undertone')" class="px-2 py-1 rounded-lg border border-fc-primary text-fc-primary hover:bg-fc-primary hover:text-white transition text-[9px] font-bold">
+                      EDIT UNDERTONE
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Inline Quick Edit Pickers (Instant Update without Re-uploading) -->
+                <div id="quick-edit-shape-panel" class="hidden mt-3 p-3 bg-fc-bg rounded-xl border border-fc-border">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-bold text-fc-primary">Select Face Shape:</span>
+                    <button onclick="toggleQuickEdit('shape')" class="text-fc-text/50 text-[10px] hover:text-fc-primary">✕</button>
+                  </div>
+                  <div class="grid grid-cols-3 gap-1.5">
+                    ${['Oval', 'Round', 'Square', 'Heart', 'Diamond', 'Oblong'].map(s => `
+                      <button onclick="quickUpdateFaceShape('${s}')" class="px-2 py-1.5 rounded-lg text-[10px] font-bold transition border ${shape.toLowerCase() === s.toLowerCase() ? 'bg-fc-primary text-white border-fc-primary' : 'bg-white text-fc-text border-fc-border hover:border-fc-primary'}">
+                        ${s}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <div id="quick-edit-undertone-panel" class="hidden mt-3 p-3 bg-fc-bg rounded-xl border border-fc-border">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-bold text-fc-primary">Select Undertone:</span>
+                    <button onclick="toggleQuickEdit('undertone')" class="text-fc-text/50 text-[10px] hover:text-fc-primary">✕</button>
+                  </div>
+                  <div class="grid grid-cols-3 gap-1.5">
+                    ${['Warm', 'Cool', 'Neutral'].map(u => `
+                      <button onclick="quickUpdateUndertone('${u}')" class="px-2 py-1.5 rounded-lg text-[10px] font-bold transition border ${ut.toLowerCase() === u.toLowerCase() ? 'bg-fc-primary text-white border-fc-primary' : 'bg-white text-fc-text border-fc-border hover:border-fc-primary'}">
+                        ${u.toUpperCase()}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Results Scrollable Body -->
+            <div class="p-4 flex-grow overflow-y-auto space-y-6">
+
+              <!-- ======================================================= -->
+              <!-- SECTION 1: DRESS COLOURS (35 Curated Shades) -->
+              <!-- ======================================================= -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-base">🎨</span>
+                    <h3 class="font-serif text-sm font-bold text-fc-primary">Dress Colour Recommendations</h3>
+                  </div>
+                  <span class="text-[10px] font-bold text-fc-primary bg-fc-lavenderLight px-2 py-0.5 rounded-full border border-fc-border">
+                    ${palette.colors.length} Distinct Shades
+                  </span>
+                </div>
+                <p class="text-[10px] text-fc-text/75 leading-relaxed mb-3">${palette.description}</p>
+
+                <!-- "Why It Suits You" Contextual Explanation Block (Colours) -->
+                <div class="mb-3.5 p-3 rounded-2xl bg-[#FAF6FF] border border-fc-lavender/60 shadow-xs flex items-start gap-2.5">
+                  <div class="w-6 h-6 rounded-lg bg-fc-lavenderLight text-fc-primary flex items-center justify-center text-xs shrink-0 mt-0.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  </div>
+                  <div>
+                    <div class="text-[9px] font-extrabold uppercase tracking-wider text-fc-primary flex items-center gap-1">
+                      <span>Why It Suits You</span>
+                      <span class="text-[10px]">✦</span>
+                    </div>
+                    <p class="text-[10px] text-fc-text/85 leading-relaxed mt-0.5">
+                      ${whyItSuitsYouLibrary.colours[ut] || whyItSuitsYouLibrary.colours['Cool']}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Category Filters for Colors: Neutrals, Everyday, Soft/Pastels, Brights, Jewel/Rich, Deep Shades -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none text-[9px] font-bold">
+                  ${['all', 'Neutrals', 'Everyday', 'Soft/Pastels', 'Brights', 'Jewel/Rich', 'Deep Shades'].map(cat => {
+                    const isCurrent = activeFilter.toLowerCase() === cat.toLowerCase();
+                    return `
+                      <button onclick="setColorFilter('${cat}')" class="px-2.5 py-1 rounded-full whitespace-nowrap transition ${isCurrent ? 'bg-fc-primary text-white shadow-xs' : 'bg-white border border-fc-border text-fc-text/70 hover:text-fc-primary'}">
+                        ${cat === 'all' ? `All (${palette.colors.length})` : cat}
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <!-- Color Swatches Grid (35 Large Swatches with tap-to-inspect detail & 'Try similar shades') -->
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                  ${filteredColors.map(c => `
+                    <div onclick="openColorDetail('${c.hex}', '${c.name.replace(/'/g, "\\'")}', '${c.cat}', '${ut}')" title="Tap to view enlarged shade & similar shades" class="p-2.5 bg-white rounded-2xl border border-fc-border shadow-xs flex items-center gap-2.5 hover:border-fc-primary cursor-pointer active:scale-95 transition group">
+                      <span class="w-10 h-10 rounded-xl shrink-0 border border-black/10 shadow-xs group-hover:scale-105 transition" style="background-color: ${c.hex};"></span>
+                      <div class="overflow-hidden text-left flex-grow">
+                        <h5 class="text-xs font-bold text-fc-text truncate group-hover:text-fc-primary transition">${c.name}</h5>
+                        <div class="flex items-center gap-1 mt-0.5">
+                          <span class="text-[9px] font-mono text-fc-text/60 uppercase">${c.hex}</span>
+                          <span class="text-[8px] text-fc-primary font-semibold truncate">• ${c.cat}</span>
+                        </div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- ======================================================= -->
+              <!-- SECTION 2: GLASSES FRAMES (5-8 Options with Carousel / Grid) -->
+              <!-- ======================================================= -->
+              <div class="pt-2 border-t border-fc-border">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-base">👓</span>
+                    <h3 class="font-serif text-sm font-bold text-fc-primary">Glasses Recommendations</h3>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-[10px] font-bold text-fc-primary bg-fc-lavenderLight px-2 py-0.5 rounded-full border border-fc-border">
+                      ${frames.length} Frame Styles
+                    </span>
+                    <!-- Carousel vs Grid View Toggle -->
+                    <div class="flex items-center bg-fc-bg p-0.5 rounded-lg border border-fc-border">
+                      <button onclick="setGlassesLayout('carousel')" title="Horizontal Carousel" class="w-5 h-5 rounded flex items-center justify-center text-[10px] transition ${glassesLayout !== 'grid' ? 'bg-fc-primary text-white shadow-xs' : 'text-fc-text/60 hover:text-fc-primary'}">
+                        <i class="fa-solid fa-arrows-left-right"></i>
+                      </button>
+                      <button onclick="setGlassesLayout('grid')" title="Responsive Grid" class="w-5 h-5 rounded flex items-center justify-center text-[10px] transition ${glassesLayout === 'grid' ? 'bg-fc-primary text-white shadow-xs' : 'text-fc-text/60 hover:text-fc-primary'}">
+                        <i class="fa-solid fa-table-cells-large"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p class="text-[10px] text-fc-text/75 leading-relaxed mb-3">
+                  Tailored frame shapes designed to harmonize with the angles and contours of your <strong>${shape}</strong> face shape.
+                </p>
+
+                <!-- "Why It Suits You" Contextual Explanation Block (Glasses) -->
+                <div class="mb-3.5 p-3 rounded-2xl bg-[#FAF6FF] border border-fc-lavender/60 shadow-xs flex items-start gap-2.5">
+                  <div class="w-6 h-6 rounded-lg bg-fc-lavenderLight text-fc-primary flex items-center justify-center text-xs shrink-0 mt-0.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  </div>
+                  <div>
+                    <div class="text-[9px] font-extrabold uppercase tracking-wider text-fc-primary flex items-center gap-1">
+                      <span>Why It Suits You</span>
+                      <span class="text-[10px]">✦</span>
+                    </div>
+                    <p class="text-[10px] text-fc-text/85 leading-relaxed mt-0.5">
+                      ${whyItSuitsYouLibrary.glasses[shape] || whyItSuitsYouLibrary.glasses['Oval']}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Glasses Cards (Carousel or Responsive Grid Layout) -->
+                ${glassesLayout === 'grid' ? `
+                  <div class="grid grid-cols-2 gap-2.5">
+                    ${frames.map((f, idx) => `
+                      <div class="p-3 bg-white rounded-2xl border border-fc-border shadow-xs flex flex-col justify-between hover:border-fc-primary transition group">
+                        <div>
+                          <div class="flex items-center justify-between mb-2">
+                            <div class="w-9 h-9 rounded-xl bg-fc-lavenderLight/70 text-fc-primary flex items-center justify-center text-lg border border-fc-border group-hover:scale-105 transition">
+                              ${f.icon}
+                            </div>
+                            <span class="text-[8px] font-bold text-fc-primary/70 bg-fc-lavenderLight/60 px-1.5 py-0.5 rounded-full">#${idx + 1}</span>
+                          </div>
+                          <h4 class="font-bold text-xs text-fc-text group-hover:text-fc-primary transition">${f.name}</h4>
+                          <p class="text-[10px] text-fc-text/70 mt-1 leading-relaxed">${f.desc}</p>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : `
+                  <div class="flex gap-2.5 overflow-x-auto pb-3 pt-1 scrollbar-none snap-x snap-mandatory">
+                    ${frames.map((f, idx) => `
+                      <div class="snap-start shrink-0 w-60 p-3.5 bg-white rounded-2xl border border-fc-border shadow-xs flex flex-col justify-between hover:border-fc-primary transition group">
+                        <div>
+                          <div class="flex items-center justify-between mb-2.5">
+                            <div class="w-10 h-10 rounded-xl bg-fc-lavenderLight text-fc-primary flex items-center justify-center text-xl border border-fc-border group-hover:scale-105 transition">
+                              ${f.icon}
+                            </div>
+                            <span class="text-[9px] font-bold text-fc-primary bg-fc-lavenderLight px-2 py-0.5 rounded-full border border-fc-border">
+                              #${idx + 1}
+                            </span>
+                          </div>
+                          <h4 class="font-bold text-xs text-fc-text group-hover:text-fc-primary transition">${f.name}</h4>
+                          <p class="text-[10px] text-fc-text/75 mt-1.5 leading-relaxed">${f.desc}</p>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-fc-border/60 flex items-center justify-between">
+                          <span class="text-[8px] font-bold uppercase tracking-wider text-fc-primary">Flattering for ${shape}</span>
+                          <span class="text-[10px] text-fc-primary">✦</span>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                `}
+              </div>
+
+              <!-- ======================================================= -->
+              <!-- SECTION 3: HAIRSTYLES (5-8 Options with Gender/Length Filter) -->
+              <!-- ======================================================= -->
+              <div class="pt-2 border-t border-fc-border pb-4">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-base">💇‍♀️</span>
+                    <h3 class="font-serif text-sm font-bold text-fc-primary">Hairstyle Recommendations</h3>
+                  </div>
+                  <span class="text-[10px] font-bold text-fc-primary bg-fc-lavenderLight px-2 py-0.5 rounded-full border border-fc-border">
+                    ${hair.length} Cuts & Styles
+                  </span>
+                </div>
+                <p class="text-[10px] text-fc-text/75 leading-relaxed mb-3">
+                  Sculpted hair contours that balance cheekbone prominence and proportion for <strong>${shape}</strong> profiles.
+                </p>
+
+                <!-- Gender Preference Filter & Length Selector -->
+                <div class="mb-3 p-2 bg-white rounded-2xl border border-fc-border shadow-xs flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-fc-text/60">Gender Preference</span>
+                    <div class="flex items-center bg-fc-bg p-0.5 rounded-lg border border-fc-border">
+                      <button onclick="setHairstyleGender('Female')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition flex items-center gap-1 ${activeHairGender === 'Female' ? 'bg-fc-primary text-white shadow-xs' : 'text-fc-text/70 hover:text-fc-primary'}">
+                        <span>👩</span>
+                        <span>Female</span>
+                      </button>
+                      <button onclick="setHairstyleGender('Male')" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition flex items-center gap-1 ${activeHairGender === 'Male' ? 'bg-fc-primary text-white shadow-xs' : 'text-fc-text/70 hover:text-fc-primary'}">
+                        <span>👨</span>
+                        <span>Male</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between pt-1.5 border-t border-fc-border/60">
+                    <span class="text-[9px] font-bold uppercase tracking-wider text-fc-text/60">Length</span>
+                    <div class="flex items-center gap-1">
+                      ${['all', 'Short', 'Medium', 'Long'].map(len => {
+                        const isSel = activeHairLength.toLowerCase() === len.toLowerCase();
+                        return `
+                          <button onclick="setHairstyleLength('${len}')" class="px-2 py-0.5 rounded-md text-[9px] font-bold transition ${isSel ? 'bg-fc-primary text-white shadow-xs' : 'bg-fc-bg text-fc-text/70 border border-fc-border hover:border-fc-primary'}">
+                            ${len === 'all' ? 'All' : len}
+                          </button>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- "Why It Suits You" Contextual Explanation Block (Hairstyles) -->
+                <div class="mb-3.5 p-3 rounded-2xl bg-[#FAF6FF] border border-fc-lavender/60 shadow-xs flex items-start gap-2.5">
+                  <div class="w-6 h-6 rounded-lg bg-fc-lavenderLight text-fc-primary flex items-center justify-center text-xs shrink-0 mt-0.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  </div>
+                  <div>
+                    <div class="text-[9px] font-extrabold uppercase tracking-wider text-fc-primary flex items-center gap-1">
+                      <span>Why It Suits You</span>
+                      <span class="text-[10px]">✦</span>
+                    </div>
+                    <p class="text-[10px] text-fc-text/85 leading-relaxed mt-0.5">
+                      ${whyItSuitsYouLibrary.hairstyles[shape] || whyItSuitsYouLibrary.hairstyles['Oval']}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Hairstyle Cards -->
+                <div class="space-y-2">
+                  ${hair.map((h, idx) => `
+                    <div class="p-3 bg-white rounded-2xl border border-fc-border shadow-xs flex items-start gap-3 hover:border-fc-primary transition group">
+                      <div class="w-10 h-10 rounded-xl bg-fc-lavenderLight text-fc-primary flex items-center justify-center text-lg shrink-0 border border-fc-border group-hover:scale-105 transition">
+                        ${h.icon}
+                      </div>
+                      <div class="text-left flex-grow">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center gap-1.5">
+                            <h4 class="font-bold text-xs text-fc-text group-hover:text-fc-primary transition">${h.name}</h4>
+                            <span class="px-1.5 py-0.5 rounded-md text-[8px] font-bold bg-fc-lavenderLight text-fc-primary border border-fc-border">${h.length || 'Medium'}</span>
+                          </div>
+                          <span class="text-[8px] font-bold text-fc-primary/60">#${idx + 1}</span>
+                        </div>
+                        <p class="text-[10px] text-fc-text/70 mt-0.5 leading-relaxed">${h.desc}</p>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+            </div>
+            ${renderNavBar('results')}
+          </div>
+        `;
+      }
+
+      // -----------------------------------------------------------------------
+      // SCREEN 11: PROFILE & SETTINGS (Guest vs Member, History, Logout)
+      // -----------------------------------------------------------------------
+      else if (screenId === 'profile') {
+        const isGuest = state.user.isGuest;
+        viewport.innerHTML = `
+          <div class="flex flex-col h-full flex-grow">
+            <div class="p-5 flex-grow overflow-y-auto">
+              
+              <!-- Header -->
+              <div class="flex items-center justify-between mb-5">
+                <h2 class="font-serif text-xl font-bold text-fc-primary">Profile & Settings</h2>
+                <div class="scale-75">
+                  ${getFaceCardLogoSvg(32, false)}
+                </div>
+              </div>
+
+              <!-- User Card -->
+              <div class="p-4 rounded-3xl bg-white border border-fc-border shadow-card flex items-center gap-3.5 mb-5">
+                <div class="w-14 h-14 rounded-2xl bg-fc-lavender text-fc-primary text-xl font-bold flex items-center justify-center shadow-xs">
+                  ${isGuest ? '<i class="fa-regular fa-user"></i>' : state.user.username.charAt(0).toUpperCase()}
+                </div>
+                <div class="flex-grow">
+                  <div class="flex items-center gap-1.5">
+                    <h3 class="font-bold text-sm text-fc-text">${isGuest ? 'Guest User' : state.user.username}</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${isGuest ? 'bg-amber-100 text-amber-800' : 'bg-fc-lavenderLight text-fc-primary'}">
+                      ${isGuest ? 'Guest Mode' : 'Member'}
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-fc-text/60 mt-0.5">${isGuest ? 'Temporary local analysis session' : state.user.email}</p>
+                  <span class="text-[9px] font-semibold text-fc-primary mt-1 block">Gender Preference: ${state.user.gender}</span>
+                </div>
+              </div>
+
+              ${isGuest ? `
+                <!-- Guest Conversion Banner -->
+                <div class="p-4 rounded-2xl bg-gradient-to-r from-fc-lavenderLight to-white border border-fc-border mb-5 text-center">
+                  <h4 class="font-bold text-xs text-fc-primary">Save Your Style History</h4>
+                  <p class="text-[10px] text-fc-text/70 mt-1">Create an account to save your biometric assessments and access them anytime.</p>
+                  <button onclick="openAuth('signup')" class="mt-3 px-4 py-2 bg-fc-primary text-white rounded-xl text-xs font-bold shadow-xs hover:bg-fc-plumDark transition">
+                    Create Free Account
+                  </button>
+                </div>
+              ` : ''}
+
+              <!-- Saved Analysis History (Logged in users can view history) -->
+              <div class="mb-5">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-fc-primary">Saved Style History</span>
+                  <span class="text-[10px] text-fc-text/50 font-semibold">${state.savedResults.length} records</span>
+                </div>
+
+                ${state.savedResults.length === 0 ? `
+                  <div class="p-6 bg-white rounded-2xl border border-fc-border text-center text-fc-text/60 text-xs">
+                    No saved style reports yet. Analyze your face and click "Save Report".
+                  </div>
+                ` : `
+                  <div class="space-y-2">
+                    ${state.savedResults.map(item => `
+                      <div class="p-3 bg-white rounded-2xl border border-fc-border shadow-xs flex items-center justify-between">
+                        <div>
+                          <div class="flex items-center gap-1.5">
+                            <h4 class="font-bold text-xs text-fc-text">${item.faceShape} Face • ${item.undertone}</h4>
+                          </div>
+                          <p class="text-[9px] text-fc-text/50 mt-0.5">${item.date || 'Saved Assessment'}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <button onclick="loadSavedResult('${item.faceShape}', '${item.undertone}')" class="px-2.5 py-1 bg-fc-bg text-fc-primary hover:bg-fc-lavenderLight rounded-lg text-[10px] font-bold border border-fc-border transition">
+                            View
+                          </button>
+                          <button onclick="deleteSavedResult(${item.id})" class="text-zinc-300 hover:text-red-400 p-1 transition">
+                            <i class="fa-regular fa-trash-can text-xs"></i>
+                          </button>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                `}
+              </div>
+
+              <!-- Settings & Actions -->
+              <div class="space-y-2 pt-2 border-t border-fc-border">
+                <button onclick="router('analysis_choice')" class="w-full p-3 bg-white hover:bg-fc-bg border border-fc-border rounded-xl text-left flex items-center justify-between text-xs font-bold text-fc-text transition">
+                  <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate text-fc-primary"></i>
+                    New Biometric Analysis
+                  </span>
+                  <i class="fa-solid fa-chevron-right text-[10px] text-fc-text/30"></i>
+                </button>
+
+                <!-- Logout inside Profile / Settings -->
+                <button onclick="handleLogout()" class="w-full p-3 bg-red-50 hover:bg-red-100 border border-red-100 rounded-xl text-left flex items-center justify-between text-xs font-bold text-red-700 transition">
+                  <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    ${isGuest ? 'Exit Guest Session' : 'Log Out'}
+                  </span>
+                  <i class="fa-solid fa-chevron-right text-[10px] text-red-300"></i>
+                </button>
+              </div>
+
+            </div>
+            ${renderNavBar('profile')}
+          </div>
+        `;
+      }
+    }
+
+    // =========================================================================
+    // AUTH LOGIC & HELPERS
+    // =========================================================================
+    function openAuth(tab) {
+      window.currentAuthTab = tab;
+      router('auth');
+    }
+
+    function switchAuthTab(tab) {
+      window.currentAuthTab = tab;
+      const loginBtn = document.getElementById('auth-login-tab');
+      const signupBtn = document.getElementById('auth-signup-tab');
+      const body = document.getElementById('auth-form-body');
+
+      if (tab === 'login') {
+        loginBtn.className = "w-1/2 py-2 text-center text-xs font-bold rounded-xl transition bg-fc-primary text-white shadow-sm";
+        signupBtn.className = "w-1/2 py-2 text-center text-xs font-bold rounded-xl transition text-fc-text/60 hover:text-fc-primary";
+      } else {
+        signupBtn.className = "w-1/2 py-2 text-center text-xs font-bold rounded-xl transition bg-fc-primary text-white shadow-sm";
+        loginBtn.className = "w-1/2 py-2 text-center text-xs font-bold rounded-xl transition text-fc-text/60 hover:text-fc-primary";
+      }
+      body.innerHTML = renderAuthForm(tab);
+    }
+
+    function renderAuthForm(tab) {
+      if (tab === 'login') {
+        return `
+          <form onsubmit="handleLoginSubmit(event)" class="flex flex-col h-full justify-between space-y-4">
+            <div class="space-y-3 pt-1">
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-fc-primary mb-1">Email Address</label>
+                <input id="login-email" type="email" value="ayla@facecard.app" required class="w-full px-3.5 py-2.5 bg-white border border-fc-border rounded-xl text-xs focus:outline-none focus:border-fc-primary text-fc-text" placeholder="name@domain.com" />
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold uppercase tracking-wider text-fc-primary mb-1">Password</label>
+                <input id="login-password" type="password" value="password123" required class="w-full px-3.5 py-2.5 bg-white border border-fc-border rounded-xl text-xs focus:outline-none focus:border-fc-primary text-fc-text" placeholder="••••••••" />
+              </div>
+
+              <div class="text-right">
+                <button type="button" onclick="showToast('Password reset link simulated')" class="text-[10px] text-fc-primary font-bold hover:underline">Forgot password?</button>
+              </div>
+            </div>
+
+            <div class="space-y-2 pt-4">
+              <button type="submit" class="w-full py-3.5 bg-fc-primary hover:bg-fc-plumDark text-white text-xs uppercase tracking-wider font-bold rounded-2xl shadow-plum transition">
+                Log In
+              </button>
+              <button type="button" onclick="continueAsGuest()" class="w-full py-2.5 text-center text-xs text-fc-text/65 font-medium hover:text-fc-primary">
+                Skip and continue as Guest
+              </button>
+            </div>
+          </form>
+        `;
+      } else {
+        // Sign-up fields: Username, Email, Password, Confirm Password, Male/Female selection
+        return `
+          <form onsubmit="handleSignupSubmit(event)" class="space-y-3 pt-1">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-fc-primary mb-1">Username</label>
+              <input id="signup-username" type="text" placeholder="e.g. Ayla Rose" required class="w-full px-3.5 py-2.5 bg-white border border-fc-border rounded-xl text-xs focus:outline-none focus:border-fc-primary text-fc-text" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-fc-primary mb-1">Email Address</label>
+              <input id="signup-email" type="email" placeholder="name@domain.com" required class="w-full px-3.5 py-2.5 bg-white border border-fc-border rounded-xl text-xs focus:outline-none focus:border-fc-primary text-fc-text" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-fc-primary mb-1">Password</label>
+              <input id="signup-password" type="password" placeholder="••••••••" required class="w-full px-3.5 py-2.5 bg-white border border-fc-border rounded-xl text-xs focus:outline-none focus:border-fc-primary text-fc-text" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-fc-primary mb-1">Confirm Password</label>
+              <input id="signup-confirm-password" type="password" placeholder="••••••••" required class="w-full px-3.5 py-2.5 bg-white border border-fc-border rounded-xl text-xs focus:outline-none focus:border-fc-primary text-fc-text" />
+            </div>
+
+            <!-- Male/Female Selection Field -->
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-fc-primary mb-1.5">Gender Selection</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="setSignupGender('Female')" id="gender-btn-Female" class="py-2.5 px-3 rounded-xl border-2 font-bold text-xs flex items-center justify-center gap-1.5 transition bg-white border-fc-primary text-fc-primary">
+                  <span>👩 Female</span>
+                </button>
+                <button type="button" onclick="setSignupGender('Male')" id="gender-btn-Male" class="py-2.5 px-3 rounded-xl border-2 font-bold text-xs flex items-center justify-center gap-1.5 transition bg-white border-fc-border text-fc-text/60">
+                  <span>👨 Male</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="pt-3 pb-2">
+              <button type="submit" class="w-full py-3.5 bg-fc-primary hover:bg-fc-plumDark text-white text-xs uppercase tracking-wider font-bold rounded-2xl shadow-plum transition">
+                Create FaceCard Account
+              </button>
+            </div>
+          </form>
+        `;
+      }
+    }
+
+    let signupSelectedGender = 'Female';
+    function setSignupGender(g) {
+      signupSelectedGender = g;
+      const fBtn = document.getElementById('gender-btn-Female');
+      const mBtn = document.getElementById('gender-btn-Male');
+      if (fBtn && mBtn) {
+        if (g === 'Female') {
+          fBtn.className = "py-2.5 px-3 rounded-xl border-2 font-bold text-xs flex items-center justify-center gap-1.5 transition bg-white border-fc-primary text-fc-primary";
+          mBtn.className = "py-2.5 px-3 rounded-xl border-2 font-bold text-xs flex items-center justify-center gap-1.5 transition bg-white border-fc-border text-fc-text/60";
+        } else {
+          mBtn.className = "py-2.5 px-3 rounded-xl border-2 font-bold text-xs flex items-center justify-center gap-1.5 transition bg-white border-fc-primary text-fc-primary";
+          fBtn.className = "py-2.5 px-3 rounded-xl border-2 font-bold text-xs flex items-center justify-center gap-1.5 transition bg-white border-fc-border text-fc-text/60";
+        }
+      }
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      state.user.isLoggedIn = true;
+      state.user.isGuest = false;
+      state.user.email = email || 'user@facecard.app';
+      state.user.username = email.split('@')[0] || 'Member';
+      showToast(`Welcome back, ${state.user.username}!`);
+      router('home');
+    }
+
+    function handleSignupSubmit(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('signup-password').value;
+      const confirmPwd = document.getElementById('signup-confirm-password').value;
+      if (pwd !== confirmPwd) {
+        showToast("Passwords do not match. Please verify.");
+        return;
+      }
+      const username = document.getElementById('signup-username').value;
+      const email = document.getElementById('signup-email').value;
+      state.user.username = username || 'Ayla Rose';
+      state.user.email = email || 'user@facecard.app';
+      state.user.gender = signupSelectedGender;
+      state.user.isLoggedIn = true;
+      state.user.isGuest = false;
+
+      showToast(`Account created for ${state.user.username}`);
+      router('home');
+    }
+
+    function continueAsGuest() {
+      state.user.isLoggedIn = false;
+      state.user.isGuest = true;
+      state.user.username = 'Guest';
+      showToast("Continuing as Guest (All analysis unlocked)");
+      router('home');
+    }
+
+    function handleLogout() {
+      state.user.isLoggedIn = false;
+      state.user.isGuest = false;
+      showToast("Logged out successfully");
+      router('welcome');
+    }
+
+    // =========================================================================
+    // REAL CAMERA & GALLERY INTEGRATION (Live Viewfinder, MediaDevices & Permissions)
+    // =========================================================================
+    let activeCameraStream = null;
+    let currentCameraFacing = 'user'; // 'user' (front) or 'environment' (back)
+
+    async function triggerCameraScan() {
+      const modal = document.getElementById('camera-modal');
+      const errBox = document.getElementById('camera-error-state');
+      if (errBox) errBox.classList.add('hidden');
+      if (modal) modal.classList.remove('hidden');
+
+      await requestCameraPermissionsAndStart();
+    }
+
+    async function requestCameraPermissionsAndStart() {
+      const video = document.getElementById('camera-video-stream');
+      const errBox = document.getElementById('camera-error-state');
+      const errMsg = document.getElementById('camera-error-msg');
+
+      // Stop any existing stream
+      if (activeCameraStream) {
+        activeCameraStream.getTracks().forEach(t => t.stop());
+        activeCameraStream = null;
+      }
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (errBox) errBox.classList.remove('hidden');
+        if (errMsg) errMsg.textContent = "Camera API is not supported in this browser environment. You can use your device's native camera or upload from gallery.";
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: currentCameraFacing,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+
+        activeCameraStream = stream;
+        if (video) {
+          video.srcObject = stream;
+          video.play().catch(() => {});
+        }
+        if (errBox) errBox.classList.add('hidden');
+        showToast("Camera connected! Align your face inside the frame.");
+      } catch (err) {
+        console.warn("Camera permission or initialization error:", err);
+        if (errBox) errBox.classList.remove('hidden');
+        if (errMsg) {
+          if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+            errMsg.textContent = "Camera permission was denied. Please allow camera permissions in your browser bar, or tap 'Use Native Device Camera' below.";
+          } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+            errMsg.textContent = "No camera found on this device. Please select a photo from your gallery.";
+          } else {
+            errMsg.textContent = "Could not activate camera (" + (err.message || err.name) + "). Please try again or use native device capture.";
+          }
+        }
+      }
+    }
+
+    function switchCameraFacing() {
+      currentCameraFacing = (currentCameraFacing === 'user') ? 'environment' : 'user';
+      requestCameraPermissionsAndStart();
+    }
+
+    function stopCameraStream() {
+      if (activeCameraStream) {
+        activeCameraStream.getTracks().forEach(track => track.stop());
+        activeCameraStream = null;
+      }
+      const video = document.getElementById('camera-video-stream');
+      if (video) video.srcObject = null;
+      const modal = document.getElementById('camera-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function captureCameraSnapshot() {
+      const video = document.getElementById('camera-video-stream');
+      const canvas = document.getElementById('camera-snapshot-canvas');
+      if (!video || !canvas) return;
+
+      if (!activeCameraStream) {
+        showToast("No active camera stream. Please allow permissions first.");
+        return;
+      }
+
+      const w = video.videoWidth || 640;
+      const h = video.videoHeight || 480;
+      canvas.width = w;
+      canvas.height = h;
+
+      const ctx = canvas.getContext('2d');
+      // Flip horizontally if front camera for natural selfie orientation
+      if (currentCameraFacing === 'user') {
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
+      }
+      ctx.drawImage(video, 0, 0, w, h);
+
+      const capturedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      stopCameraStream();
+
+      state.analysis.uploadedImageUrl = capturedDataUrl;
+      state.analysis.method = 'camera';
+      showToast("Photo captured! Running biometric facial scan...");
+      pickSmartRandomDiagnostics();
+      router('processing');
+    }
+
+    function fallbackToDeviceCamera() {
+      stopCameraStream();
+      const fallbackInput = document.getElementById('real-camera-capture-fallback');
+      if (fallbackInput) {
+        fallbackInput.click();
+      } else {
+        triggerGalleryUpload();
+      }
+    }
+
+    function triggerGalleryUpload() {
+      const uploader = document.getElementById('real-image-uploader');
+      if (uploader) {
+        // Reset file input value so re-selecting the same file triggers onchange
+        uploader.value = '';
+        uploader.click();
+      } else {
+        simulateFallbackGallery();
+      }
+    }
+
+    function handleRealImageUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          state.analysis.uploadedImageUrl = e.target.result;
+          state.analysis.method = 'gallery';
+          showToast("Photo loaded! Running biometric scan...");
+          pickSmartRandomDiagnostics();
+          router('processing');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        simulateFallbackGallery();
+      }
+    }
+
+    function simulateFallbackGallery() {
+      state.analysis.method = 'gallery';
+      state.analysis.uploadedImageUrl = null;
+      showToast("Photo selected from gallery!");
+      pickSmartRandomDiagnostics();
+      router('processing');
+    }
+
+    function pickSmartRandomDiagnostics() {
+      const shapes = ['Oval', 'Round', 'Square', 'Heart', 'Diamond', 'Oblong'];
+      const tones = ['Cool', 'Warm', 'Neutral'];
+      state.analysis.faceShape = shapes[Math.floor(Math.random() * shapes.length)];
+      state.analysis.undertone = tones[Math.floor(Math.random() * tones.length)];
+    }
+
+    function runProcessingSequence() {
+      const title = document.getElementById('proc-title');
+      const desc = document.getElementById('proc-desc');
+
+      const stages = [
+        { title: 'Detecting your face…', desc: 'Aligning facial contour in balanced lighting…' },
+        { title: 'Reading facial proportions…', desc: 'Evaluating shape ratios and aesthetic proportions…' },
+        { title: 'Checking undertone…', desc: 'Observing warm, cool, and neutral harmony cues…' },
+        { title: 'Preparing your FaceCard…', desc: 'Assembling your personalized style palette & frames…' }
+      ];
+
+      function updatePills(activeIdx) {
+        for (let i = 0; i < 4; i++) {
+          const pill = document.getElementById(`proc-step-${i}`);
+          if (pill) {
+            if (i === activeIdx) {
+              pill.className = "h-1.5 w-6 rounded-full bg-fc-primary transition-all duration-300 shadow-sm";
+            } else if (i < activeIdx) {
+              pill.className = "h-1.5 w-2.5 rounded-full bg-fc-plumLight transition-all duration-300";
+            } else {
+              pill.className = "h-1.5 w-2 rounded-full bg-fc-border transition-all duration-300";
+            }
+          }
+        }
+      }
+
+      let step = 0;
+      updatePills(0);
+
+      const interval = setInterval(() => {
+        step++;
+        if (step < stages.length) {
+          if (title) {
+            title.style.opacity = '0';
+            setTimeout(() => {
+              title.textContent = stages[step].title;
+              title.style.opacity = '1';
+            }, 150);
+          }
+          if (desc) {
+            desc.style.opacity = '0';
+            setTimeout(() => {
+              desc.textContent = stages[step].desc;
+              desc.style.opacity = '1';
+            }, 150);
+          }
+          updatePills(step);
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            router('results');
+          }, 450);
+        }
+      }, 900);
+    }
+
+    function selectManualShape(shape) {
+      state.analysis.faceShape = shape;
+      router('manual_shape');
+    }
+
+    function selectManualUndertone(tone) {
+      state.analysis.undertone = tone;
+      router('manual_undertone');
+    }
+
+    function submitManualSelections() {
+      state.analysis.method = 'manual';
+      router('processing');
+    }
+
+    function setColorFilter(cat) {
+      state.colorCategoryFilter = cat;
+      router('results');
+    }
+
+    // =========================================================================
+    // SECTION 11: COLOR DETAIL MODAL & "TRY SIMILAR SHADES" INTERACTION
+    // =========================================================================
+    let currentDetailColor = null;
+
+    function openColorDetail(hex, name, cat, undertone) {
+      currentDetailColor = { hex, name, cat, undertone };
+      const modal = document.getElementById('color-detail-modal');
+      const swatch = document.getElementById('detail-color-swatch');
+      const hexTag = document.getElementById('detail-color-hex-tag');
+      const nameEl = document.getElementById('detail-color-name');
+      const catEl = document.getElementById('detail-color-cat');
+      const utEl = document.getElementById('detail-color-undertone');
+      const similarBox = document.getElementById('detail-similar-shades');
+      if (!modal) return;
+
+      swatch.style.backgroundColor = hex;
+      hexTag.textContent = hex.toUpperCase();
+      nameEl.textContent = name;
+      catEl.textContent = cat;
+      utEl.textContent = `${undertone} Undertone`;
+
+      // Compute neighboring shades from palette
+      const palette = colorLibrary[undertone] || colorLibrary['Cool'];
+      
+      // Pick 4 similar shades from same category or neighboring indices
+      let similar = palette.colors.filter(c => c.name.toLowerCase() !== name.toLowerCase() && c.cat === cat);
+      if (similar.length < 4) {
+        similar = palette.colors.filter(c => c.name.toLowerCase() !== name.toLowerCase());
+      }
+      const selectedSimilar = similar.slice(0, 4);
+
+      similarBox.innerHTML = selectedSimilar.map(s => `
+        <button onclick="openColorDetail('${s.hex}', '${s.name.replace(/'/g, "\\'")}', '${s.cat}', '${undertone}')" class="p-1.5 rounded-xl bg-fc-bg border border-fc-border hover:border-fc-primary flex flex-col items-center gap-1 transition active:scale-95 group text-left">
+          <span class="w-full h-8 rounded-lg shadow-xs border border-black/10 block group-hover:scale-105 transition" style="background-color: ${s.hex};"></span>
+          <span class="text-[9px] font-bold text-fc-text/85 truncate w-full text-center">${s.name}</span>
+        </button>
+      `).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeColorDetail() {
+      const modal = document.getElementById('color-detail-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyCurrentDetailHex() {
+      if (currentDetailColor) {
+        copyColorHex(currentDetailColor.hex, currentDetailColor.name);
+      }
+    }
+
+    function copyColorHex(hex, name) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(hex).then(() => {
+          showToast(`Copied ${name} (${hex}) to clipboard! ✨`);
+        }).catch(() => {
+          showToast(`Copied ${hex}! ✨`);
+        });
+      } else {
+        showToast(`Copied ${hex}! ✨`);
+      }
+    }
+
+    function setGlassesLayout(layout) {
+      state.glassesLayout = layout;
+      router('results');
+    }
+
+    function setHairstyleGender(gender) {
+      state.hairstyleGender = gender;
+      router('results');
+    }
+
+    function setHairstyleLength(length) {
+      state.hairstyleLength = length;
+      router('results');
+    }
+
+    // =========================================================================
+    // SECTION 9: QUICK EDIT HANDLERS (FACE SHAPE & UNDERTONE)
+    // Allows immediate correction without re-uploading photos, instantly refreshing dependent recommendations.
+    // =========================================================================
+    function toggleQuickEdit(type) {
+      const shapePanel = document.getElementById('quick-edit-shape-panel');
+      const undertonePanel = document.getElementById('quick-edit-undertone-panel');
+      if (!shapePanel || !undertonePanel) return;
+
+      if (type === 'shape') {
+        const isHidden = shapePanel.classList.contains('hidden');
+        shapePanel.classList.toggle('hidden', !isHidden);
+        undertonePanel.classList.add('hidden');
+      } else if (type === 'undertone') {
+        const isHidden = undertonePanel.classList.contains('hidden');
+        undertonePanel.classList.toggle('hidden', !isHidden);
+        shapePanel.classList.add('hidden');
+      }
+    }
+
+    function quickUpdateFaceShape(newShape) {
+      state.analysis.faceShape = newShape;
+      showToast(`Face Shape updated to ${newShape}! Recommendations refreshed ✨`);
+      router('results');
+    }
+
+    function quickUpdateUndertone(newTone) {
+      state.analysis.undertone = newTone;
+      showToast(`Undertone updated to ${newTone}! 35 Dress Colours refreshed ✨`);
+      router('results');
+    }
+
+    // GUEST VS LOGGED IN SAVE REPORT BEHAVIOR
+    function saveCurrentResults() {
+      if (state.user.isGuest) {
+        // Prompt guest that logged-in users get persistent storage
+        const modal = document.getElementById('guest-modal');
+        if (modal) modal.classList.remove('hidden');
+      } else {
+        const newEntry = {
+          id: Date.now(),
+          title: `${state.analysis.faceShape} Analysis`,
+          date: "Just now",
+          faceShape: state.analysis.faceShape,
+          undertone: state.analysis.undertone
+        };
+        state.savedResults.unshift(newEntry);
+        showToast("Report saved to your account history!");
+      }
+    }
+
+    function saveGuestLocally() {
+      const newEntry = {
+        id: Date.now(),
+        title: `${state.analysis.faceShape} Analysis (Guest)`,
+        date: "Just now",
+        faceShape: state.analysis.faceShape,
+        undertone: state.analysis.undertone
+      };
+      state.savedResults.unshift(newEntry);
+      closeGuestModal();
+      showToast("Saved to current guest session!");
+    }
+
+    function closeGuestModal() {
+      const modal = document.getElementById('guest-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function closeGuestModalAndAuth(tab) {
+      closeGuestModal();
+      openAuth(tab);
+    }
+
+    function loadSavedResult(shape, undertone) {
+      state.analysis.faceShape = shape;
+      state.analysis.undertone = undertone;
+      router('results');
+    }
+
+    function deleteSavedResult(id) {
+      state.savedResults = state.savedResults.filter(r => r.id !== id);
+      showToast("Report removed from history");
+      router('profile');
+    }
+
+    // Initialize to splash screen
+    window.addEventListener('DOMContentLoaded', () => {
+      router('splash');
+    });
+  </script>
+</body>
+</html>
