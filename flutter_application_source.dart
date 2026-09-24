@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -2356,8 +2357,51 @@ class HomeScreen extends StatelessWidget {
 class AiAnalysisScreen extends StatelessWidget {
   const AiAnalysisScreen({Key? key}) : super(key: key);
 
-  void _triggerScan(BuildContext context, String source) {
-    Navigator.pushNamed(context, '/processing', arguments: {'mode': 'ai', 'source': source});
+  Future<void> _pickImage(BuildContext context, ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        preferredCameraDevice: CameraDevice.front,
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        if (context.mounted) {
+          Navigator.pushNamed(context, '/processing', arguments: {
+            'mode': 'ai',
+            'source': source == ImageSource.camera ? 'camera' : 'gallery',
+            'imageBytes': bytes,
+            'fileName': pickedFile.name,
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error accessing image/camera: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(source == ImageSource.camera
+                ? 'Camera access denied or unavailable. Please grant camera permission in device settings.'
+                : 'Gallery access denied or unavailable. Please grant photo permission in device settings.'),
+            backgroundColor: AppPalette.primary,
+            action: SnackBarAction(
+              label: 'Proceed',
+              textColor: Colors.white,
+              onPressed: () {
+                Navigator.pushNamed(context, '/processing', arguments: {
+                  'mode': 'ai',
+                  'source': source == ImageSource.camera ? 'camera' : 'gallery',
+                });
+              },
+            ),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -2418,7 +2462,7 @@ class AiAnalysisScreen extends StatelessWidget {
               Column(
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () => _triggerScan(context, 'camera'),
+                    onPressed: () => _pickImage(context, ImageSource.camera),
                     icon: const Icon(Icons.camera_alt),
                     label: const Text('Take Photo', style: TextStyle(fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
@@ -2431,7 +2475,7 @@ class AiAnalysisScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
-                    onPressed: () => _triggerScan(context, 'gallery'),
+                    onPressed: () => _pickImage(context, ImageSource.gallery),
                     icon: const Icon(Icons.photo_library),
                     label: const Text('Upload from Gallery', style: TextStyle(fontWeight: FontWeight.bold)),
                     style: OutlinedButton.styleFrom(
@@ -3078,6 +3122,8 @@ class _ProcessingScreenState extends State<ProcessingScreen> with SingleTickerPr
     final notifier = AppStateManager.of(context).stateNotifier;
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {};
     final mode = args['mode'] as String? ?? 'manual';
+    final Uint8List? imageBytes = args['imageBytes'] as Uint8List?;
+    final String? fileName = args['fileName'] as String?;
 
     // Start background API call concurrently
     final apiFuture = FaceCardApiService.analyze(
@@ -3085,6 +3131,8 @@ class _ProcessingScreenState extends State<ProcessingScreen> with SingleTickerPr
       faceShape: notifier.value.faceShape,
       undertone: notifier.value.undertone,
       gender: notifier.value.gender,
+      imageBytes: imageBytes,
+      fileName: fileName,
     );
 
     // Step 0: "Detecting your face…"
